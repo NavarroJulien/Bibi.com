@@ -1,0 +1,2970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BIBI.com — Version Finale (Sophia intégrée)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='48'%3E🌱%3C/text%3E%3C/svg%3E">
+  <style>
+    :root { --green:#1b4332; --mint:#d8f3dc; --mint2:#95d5b2; --danger:#c1121f; }
+    body { background:#f4f7f4; color:#222; font-family: Arial, sans-serif; margin:0; padding:0; }
+    /* ACCUEIL */
+    #accueil { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#f4f7f4; transition:opacity 1s ease; z-index:1000; }
+    #logoAccueil { font-family:'Bangers', cursive; font-size:90px; color:#000; background:#fff; border:5px solid var(--green);
+      border-radius:15px; padding:20px 50px; display:flex; align-items:center; gap:20px;
+      box-shadow:0 6px 15px rgba(0,0,0,0.2); transform:rotate(-2deg) scale(0.7); opacity:0; animation:fadeZoomIn 1s forwards; cursor:pointer; }
+    #logoAccueil span { transform:rotate(2deg); display:inline-block; }
+    @keyframes fadeZoomIn { to { opacity:1; transform:rotate(-2deg) scale(1); } }
+    /* JEU */
+    #jeu { min-height:100vh; padding:30px 12px 80px; display:flex; flex-direction:column; align-items:center; }
+    h1 { font-family:'Bangers', cursive; font-size:70px; color:#000; background:#fff; border:4px solid var(--green); border-radius:15px;
+      padding:15px 40px; display:flex; align-items:center; gap:15px; box-shadow:0 4px 10px rgba(0,0,0,0.15); transform:rotate(-2deg); margin:20px 0; }
+    .top-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .total-counter { font-size:28px; font-weight:bold; color:var(--green); background:var(--mint); border:2px solid #74c69d; padding:10px 20px; border-radius:10px; }
+    .aura { font-size:18px; color:var(--green); background:#fff; border:2px solid var(--mint2); padding:6px 12px; border-radius:10px; }
+    .stats { display:flex; gap:20px; margin:14px 0 20px; font-size:18px; flex-wrap:wrap; justify-content:center; }
+    .panels { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; width:100%; max-width:1100px; }
+    .panel { background:#fff; border:2px solid var(--mint2); border-radius:10px; padding:16px; box-shadow:0 4px 10px rgba(0,0,0,.1); text-align:center; flex:1 1 260px; max-width:300px; min-width:220px; }
+    button { background:#40916c; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:15px; cursor:pointer; transition:background .2s; }
+    button:hover { background:#1b4332; } button:disabled { background:#ccc; cursor:not-allowed; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background:#8f0d18; }
+    .info-text { color:#444; font-size:15px; margin-top:8px; }
+    .muted { color:#555; font-size:14px; }
+    .auto-sell-text { color:#c1121f; font-weight:bold; margin-top:10px; }
+    .footer { position:fixed; bottom:12px; left:0; right:0; display:flex; justify-content:center; pointer-events:none; }
+    .footer .wrap { pointer-events:auto; display:flex; gap:10px; }
+    #saveToast { position:fixed; right:12px; bottom:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; box-shadow:0 4px 12px rgba(0,0,0,.12); display:none; }
+    /* Fade-in util */
+    .fade-in { animation: fadeIn .5s ease; }
+    @keyframes fadeIn { from { opacity:0; transform: scale(0.98); } to { opacity:1; transform: scale(1); } }
+    .panel.bureau-panel { border:3px solid #c1121f; box-shadow:0 0 0 3px rgba(193,18,31,0.08), 0 6px 14px rgba(0,0,0,0.12); }
+    .bar-wrap { text-align:left; }
+    .bar { position:relative; height:16px; background:#eee; border-radius:10px; overflow:hidden; border:1px solid #ddd; }
+    .bar-fill { position:absolute; left:0; top:0; bottom:0; width:0; background:#2b9348; transition:width .25s ease, background .25s ease; }
+    .bar-label { font-size:13px; color:#333; margin:6px 0 4px; }
+    .bar-num { font-size:12px; color:#333; margin-top:6px; }
+    .panel.escorts-panel { border:3px solid #e11d48; box-shadow:0 0 0 3px rgba(225,29,72,0.08), 0 6px 14px rgba(0,0,0,0.12); }
+    .escorts-row { display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .escorts-badges { font-size:13px; color:#444; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .badge { background:#ffe4e6; border:1px solid #fecdd3; color:#9f1239; border-radius:9999px; padding:2px 10px; }
+  </style>
+</head>
+<body>
+  <!-- ACCUEIL -->
+  <div id="accueil">
+    <div id="logoAccueil">🌱 <span>BIBI.com</span></div>
+  </div>
+
+  <!-- JEU -->
+  <div id="jeu" style="display:none;">
+    <h1>🌱 BIBI.com</h1>
+    <div class="top-wrap">
+      <div class="total-counter">💶 Chiffre d’affaires total : <span id="revenue">0</span> €</div>
+      <div class="aura">✨ Aura : <span id="aura">0</span></div>
+    </div>
+
+    <div class="stats">
+      <div>💵 Argent : <span id="money">0</span> €</div>
+      <div>🛍️ Pochons : <span id="bags">0</span></div>
+      <div>🌿 Nombre de 10 en stock : <span id="plants">0</span></div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h2>Détails</h2>
+        <button id="makePlant">Couper un 10</button>
+        <p class="info-text">Coûte 1 pochon</p>
+      </div>
+
+      <div class="panel">
+        <h2>Approvisionnement</h2>
+        <button id="buyBag">Acheter un pochon (5 €)</button>
+        <div style="margin-top:8px;">
+          <button id="buyBag10" style="display:none;">Acheter 10 pochons (30 €)</button>
+        </div>
+      </div>
+
+      <div class="panel" id="sellPanel">
+        <h2>Vente au Marché</h2>
+        <div class="info-text">Prix fixe : <strong>10 € / le 10</strong></div>
+        <div class="info-text">Clients actuels : <span id="clients">1</span> / sec</div>
+        <div id="sellControls" class="info-text"></div>
+      </div>
+
+      <div class="panel" id="auraPanel" style="display:none;">
+        <h2>Récompenses d’Aura</h2>
+        <div class="muted">Palier actuel : <strong id="auraNow">0</strong></div>
+        <div class="info-text" id="rewardDesc">Prochaine récompense : —</div>
+        <button id="claimBtn" disabled>Débloquer</button>
+      </div>
+
+      <div class="panel" id="upgradePanel" style="display:none;">
+        <h2>Améliorations</h2>
+        <div class="info-text"><strong>Amélioration des pochons</strong></div>
+        <div class="muted">Chaque amélioration double le nombre de clients.</div>
+        <div class="info-text">Niveau actuel : <span id="upgradeLevel">0</span></div>
+        <div class="info-text">Multiplicateur de clients : x<span id="clientMult">1</span></div>
+        <div class="info-text">Coût de la prochaine amélioration : <span id="upgradeCost">1k</span> €</div>
+        <button id="upgradeBtn">Améliorer</button>
+      </div>
+
+      <div class="panel" id="employeesPanel" style="display:none;">
+        <h2>👨‍🔬 Employés de production</h2>
+        <div class="info-text">Chimistes : <span id="chemists">0</span></div>
+        <div class="info-text">Production : <span id="chemistsPps">0.00</span> 10 / sec</div>
+        <div class="info-text">Prix du prochain : <span id="chemistPrice">500</span> €</div>
+        <button id="buyChemistBtn">Acheter un chimiste</button>
+        <div style="height:8px"></div>
+        <button id="pressureBtn">🔫 Mettre la pression</button>
+      </div>
+
+      <div class="panel bureau-panel" id="officePanel" style="display:none;">
+        <h2>🧠 Bureau</h2>
+        <div class="info-text">Gère ta pression et ta tension pour ne pas imploser.</div>
+        <div style="height:8px"></div>
+
+        <div class="bar-wrap">
+          <div class="bar-label">Pression</div>
+          <div class="bar"><div class="bar-fill" id="pressureFill"></div></div>
+          <div class="bar-num">Niveau : <span id="pressureVal">0</span>%</div>
+          <div style="margin-top:8px;">
+            <button id="relieveBtn" style="display:none;">💦 Se branler</button>
+          </div>
+        </div>
+
+        <div style="height:16px"></div>
+
+        <div class="bar-wrap">
+          <div class="bar-label">Tension</div>
+          <div class="bar"><div class="bar-fill" id="strainFill" style="background:#d90429;"></div></div>
+          <div class="bar-num">Niveau : <span id="strainVal">0</span>%</div>
+          <div style="margin-top:8px;">
+            <button id="drugBtn" style="display:none;">💊 Se droguer (10 €)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel escorts-panel" id="escortsPanel" style="display:none;">
+        <h2>💋 Trixy</h2>
+        <div class="escorts-row">
+          <div class="escorts-badges">
+            <span class="badge">Trixy</span>
+            <span class="badge" id="trixyStatus">Non achetée</span>
+          </div>
+          <div class="info-text" id="trixyInfo">Acheter Trixy pour démarrer ses revenus passifs.</div>
+          <div>
+            <button id="buyTrixyBtn">Acheter Trixy (10&nbsp;000&nbsp;€)</button>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <button id="trixyPressureBtn" style="display:none;">💢 Mettre la pression</button>
+            <button id="trixyFavorBtn" style="display:none;">💄 Demander une faveur à Trixy (50&nbsp;€)</button>
+          </div>
+          <div class="info-text" id="trixyStats" style="display:none;">
+            Revenus: <strong><span id="trixyIncome">0</span> €/s</strong> • Conso pochons: <strong>2 /s</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOUVEAU : Sophia, 2e escorte -->
+      <div class="panel escorts-panel" id="sophiaPanel" style="display:none;">
+        <h2>💉 Sophia</h2>
+        <div class="escorts-row">
+          <div class="escorts-badges">
+            <span class="badge">Sophia</span>
+            <span class="badge" id="sophiaStatus">Non achetée</span>
+          </div>
+          <div class="info-text" id="sophiaInfo">Acheter Sophia pour démarrer ses revenus passifs.</div>
+          <div>
+            <button id="buySophiaBtn">Acheter Sophia (10&nbsp;000&nbsp;€)</button>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <button id="sophiaPressureBtn" style="display:none;">💢 Mettre la pression</button>
+            <button id="sophiaFavorBtn" style="display:none;">💉 Se droguer avec Sophia (50&nbsp;€)</button>
+          </div>
+          <div class="info-text" id="sophiaStats" style="display:none;">
+            Revenus: <strong><span id="sophiaIncome">0</span> €/s</strong> • Conso pochons: <strong>2 /s</strong>
+          </div>
+        </div>
+      </div>
+	  
+	  <!-- NOUVELLE ESCORTE : Émilie -->
+<div class="panel escorts-panel" id="emiliePanel" style="display:none;">
+  <h2>💃 Émilie</h2>
+  <div class="escorts-row">
+    <div class="escorts-badges">
+      <span class="badge">Émilie</span>
+      <span class="badge" id="emilieStatus">Non achetée</span>
+    </div>
+    <div class="info-text" id="emilieInfo">Acheter Émilie pour démarrer ses revenus passifs.</div>
+    <div>
+      <button id="buyEmilieBtn">Acheter Émilie (50&nbsp;000&nbsp;€)</button>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button id="emilieBoostBtn" style="display:none;">💄 Booster Émilie (20&nbsp;000&nbsp;€)</button>
+    </div>
+
+    <div class="info-text" id="emilieStats" style="display:none;">
+      Revenus: <strong><span id="emilieIncome">0</span> €/s</strong> • Conso pochons: <strong>2 /s</strong>
+    </div>
+
+    <!-- Barre de vie -->
+    <div class="bar-wrap" style="margin-top:10px;">
+      <div class="bar-label">Amour d’Émilie</div>
+      <div class="bar"><div class="bar-fill" id="emilieHealthFill" style="width:0%;background:#2b9348;"></div></div>
+      <div class="bar-num">Amour : <span id="emilieHealthVal">0</span>%</div>
+      <button id="emilieResetBtn" style="display:none;margin-top:8px;">🥊 Frapper Émilie</button>
+    </div>
+  </div> <!-- ✅ fermeture correcte de escorts-row -->
+</div> <!-- ✅ fermeture correcte du panel -->
+
+	  
+	  <!-- PANNEAUX COMMERCES (palier 5000 Aura) -->
+	  <div id="chichaPanel" class="panel" style="display:none;">
+		<h2>🫧 Bar à Chicha</h2>
+		<div id="chichaContent"></div>
+	  </div>
+
+	  <div id="coffeePanel" class="panel" style="display:none;">
+		<h2>☕ Coffee Shop</h2>
+		<div id="coffeeContent"></div>
+	  </div>
+
+	  <div id="stripPanel" class="panel" style="display:none;">
+		<h2>💃 Strip Club</h2>
+		<div id="stripContent"></div>
+	  </div>
+	  
+	  <!-- PANNEAU BRAQUEURS (palier 40 000 Aura) -->
+<div id="braqueurPanel" class="panel" style="display:none;">
+  <h2>💣 Braqueurs</h2>
+  <div id="braqueurContent"></div>
+</div>
+
+	<!-- PANNEAU FERME À CRYPTO (palier 50 000 Aura) -->
+<div id="cryptoPanel" class="panel" style="display:none;">
+  <h2>💻 Gestion Crypto</h2>
+  <div id="cryptoContent"></div>
+</div>
+
+<!-- PANNEAU BIBITRADE -->
+<div id="bibitradePanel" class="panel" style="display:none;">
+  <h2>💱 Bibitrade</h2>
+  <div id="bibitradeContent"></div>
+</div>
+
+<!-- ======== PANNEAU FAMILLE ======== -->
+<div id="familyPanel" class="panel" style="display:none;">
+  <h2>👪 Famille</h2>
+  <div id="familyContent"></div>
+</div>
+
+<!-- ======== PANNEAU AÉROPORT ======== -->
+<div id="airportPanel" class="panel" style="display:none;">
+  <h2>✈️ Aéroport</h2>
+  <div id="airportContent"></div>
+</div>
+
+<!-- ======== PANNEAU SANTÉ ======== -->
+<div id="healthPanel" class="panel" style="display:none;">
+  <h2>🩸 Santé</h2>
+  <div id="healthContent">
+    <div class="bar-wrap">
+      <div class="bar-label">Santé</div>
+      <div class="bar"><div class="bar-fill" id="healthFill" style="width:100%;background:#2b9348;"></div></div>
+      <div class="bar-num">Niveau : <span id="healthVal">100</span>%</div>
+    </div>
+    <div class="info-text" id="healthInfo">Ta santé baisse avec le temps... 💀</div>
+    <button id="injectBtn" style="margin-top:8px;">💉 Se piquer à l’héroïne (500 000 €)</button>
+  </div>
+</div>
+
+<!-- ======== PANNEAU ARMÉE ======== -->
+<div id="armyPanel" class="panel" style="display:none;">
+  <h2>🪖 Armée</h2>
+  <div id="armyContent"></div>
+</div>
+
+<!-- ======== PANNEAU ATTAQUER ======== -->
+<div id="attackPanel" class="panel" style="display:none;">
+  <h2>💥 Attaquer</h2>
+  <div id="attackContent"></div>
+</div>
+
+<!-- ======== PANNEAU DETTES ======== -->
+<div id="debtsPanel" class="panel" style="display:none;">
+  <h2>📜 Dettes</h2>
+  <div id="debtsContent"></div>
+</div>
+
+<!-- ======== PANNEAU JUSTICE FRANÇAISE ======== -->
+<div id="justicePanel" class="panel" style="display:none;">
+  <h2>⚖️ Justice Française</h2>
+  <div id="justiceContent">
+    <div class="bar-label">Suspicion</div>
+    <div class="bar"><div class="bar-fill" id="justiceFill" style="width:0%;background:#2b9348;"></div></div>
+    <div class="bar-num">Niveau de suspicion : <span id="justiceVal">0</span>%</div>
+    <p id="justiceInfo" style="margin-top:8px;">⚖️ Les autorités surveillent tes activités...</p>
+    <button id="corruptJudgeBtn">💰 Corrompre le juge (1 000 000 €)</button>
+  </div>
+</div>
+
+<!-- ======== PANNEAU CLUB DU PSG ======== -->
+<div id="clubPanel" class="panel" style="display:none;">
+  <h2>🏟️ Club du PSG</h2>
+  <div id="clubContent"></div>
+</div>
+
+<!-- ======== PANNEAU CAMP D’ENTRAÎNEMENT ======== -->
+<div id="campPanel" class="panel" style="display:none;">
+  <h2>🏕️ Camp d’Entraînement</h2>
+  <div id="campContent"></div>
+</div>
+
+<!-- ======== PANNEAU CAMP MEXICAIN ======== -->
+<div id="campMexicainPanel" class="panel" style="display:none;">
+  <h2>🏕️ Camp Mexicain</h2>
+  <div id="campMexicainContent"></div>
+</div>
+
+<div id="camp2Panel" class="panel" style="display:none"></div>
+<div id="camp3Panel" class="panel" style="display:none"></div>
+<div id="camp4Panel" class="panel" style="display:none"></div>
+<div id="camp5Panel" class="panel" style="display:none"></div>
+
+
+
+
+
+      <div class="panel" id="factoryPanel" style="display:none;">
+        <h2>🏭 Factory</h2>
+        <div class="info-text">🧱 Métal : <span id="metal">0</span></div>
+        <div class="info-text">🔫 Armements : <span id="armaments">0</span></div>
+        <div style="margin-top:8px;">
+          <button id="buyMetalBtn">Acheter 1000 métal (2000 €)</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button id="convertMetalBtn">Convertir 750 métal → 1 armement</button>
+        </div>
+      </div>
+
+      <div class="panel" id="casinoPanel" style="display:none;">
+        <h2>🎰 Casino</h2>
+        <div class="info-text">Tente ta chance au casino. Choisis une couleur et double ta mise si tu gagnes !</div>
+        <div style="margin-top:8px;">
+          <label for="casinoBet">💶 Mise (€) :</label>
+          <input id="casinoBet" type="number" min="10" step="10" value="100" style="width:80px; padding:4px; border:1px solid #ccc; border-radius:6px; margin-left:4px;">
+        </div>
+        <div style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
+          <button id="betRedBtn" style="background:#c1121f;">Rouge 🔴</button>
+          <button id="betBlackBtn" style="background:#000;">Noir ⚫</button>
+        </div>
+        <div class="info-text" id="casinoResult" style="margin-top:12px; font-weight:bold;"></div>
+      </div>
+	  
+	  <!-- PANNEAUX DROGUES DURES (palier 10 000 Aura) -->
+	  <div id="extazyPanel" class="panel" style="display:none;">
+		<h2>💊 Extazy</h2>
+		<div id="extazyContent"></div>
+	  </div>
+
+	  <div id="cocainePanel" class="panel" style="display:none;">
+		<h2>🧂 Cocaïne</h2>
+		<div id="cocaineContent"></div>
+	  </div>
+
+
+    </div>
+  </div>
+
+  <!-- Footer actions -->
+  <div class="footer">
+    <div class="wrap">
+      <button id="resetBtn" class="btn-danger">🔁 Nouvelle Partie</button>
+    </div>
+  </div>
+
+  <!-- Toast sauvegarde -->
+  <div id="saveToast">✅ Partie sauvegardée</div>
+
+  <script>
+    // ACCUEIL -> afficher le jeu après fondu 1s
+    const accueil = document.getElementById('accueil');
+    const logoAccueil = document.getElementById('logoAccueil');
+    const jeu = document.getElementById('jeu');
+    logoAccueil.addEventListener('click', () => {
+      accueil.style.opacity = 0;
+      setTimeout(() => {
+        accueil.style.display = 'none';
+        jeu.style.display = 'flex';
+      }, 1000);
+    });
+
+    // ======= ÉTAT DU JEU =======
+    let money = 50;
+    let bags = 5;               // pochons
+    let plants = 0;             // nombre de "10"
+    let totalPlants = 0;        // stats internes
+    let revenue = 0;            // 💶 chiffre d'affaires cumulé
+
+    // Ventes
+    let clientsPerSecond = 1; // fixe (augmente via améliorations)
+    let canSell = true;
+    let autoSellerUnlocked = false;
+
+    // Achat auto de pochons
+    let autoBuyerUnlocked = false;
+
+    // Prix de vente
+    const sellPriceBase = 10;
+    const sellPrice = () => sellPriceBase;
+
+    // Améliorations de clients/s
+    let upgradeLevel = 0;
+    let upgradeCost = 1000;
+
+    // Employés (chimistes)
+    let chemists = 0;
+    let chemistPrice = 500;
+    const chemistBasePer10 = 5; // "10" par chimiste toutes les 10 s
+    let pressureBonus = 0;      // +1 par 10 s pour tous les chimistes à chaque clic
+	
+	// ======== MANAGERS CHIMISTES ========
+	let chemistManagers = 0;
+	let chemistManagerPrice = 500; // même prix de départ
+
+
+    // Factory resources
+    let metal = 0;
+    let armaments = 0;
+	
+	// ======= CRYPTO =======
+	let bibicoin = 0;              // stock de bibicoins
+	let cryptoFarms = 0;           // nombre de fermes possédées
+	const cryptoFarmCost = 200000; // coût d'une ferme (€)
+
+	// ======= BIBITRADE =======
+	let bibitradeRate = 1000;  // valeur actuelle du bibicoin (€)
+	let bibitradeTimer = 0;
+
+
+    // ======= ESCORTES - Trixy existante =======
+    let trixyOwned = false;
+    let trixyBoosted = false; // permanent +10 €/s if true
+    let trixyFavor = false;   // pression rate /4 if true
+
+    const escortsPanelEl = document.getElementById('escortsPanel');
+    const buyTrixyBtn = document.getElementById('buyTrixyBtn');
+    const trixyPressureBtn = document.getElementById('trixyPressureBtn');
+    const trixyFavorBtn = document.getElementById('trixyFavorBtn');
+    const trixyStatusEl = document.getElementById('trixyStatus');
+    const trixyInfoEl = document.getElementById('trixyInfo');
+    const trixyStatsEl = document.getElementById('trixyStats');
+    const trixyIncomeEl = document.getElementById('trixyIncome');
+	
+	// ======== FAMILLE ========
+	let marriedToKim = false;
+	let familyChildren = 0;         // nombre d'enfants obtenus
+	const maxChildren = 3;
+	let childTokens = 0;            // "monnaie" enfant (1 par gosse)
+	const marriageCost = 1000000;   // coût du mariage
+	const familyPassive = { projects: [] }; // revenus passifs des enfants
+
+	// ======== AÉROPORT ========
+	let airportOwned = false;
+	const airportCost = 20000; // coût en bibicoins
+	const continents = [
+  { name: 'Amérique', owned: false, progress: 0 },
+  { name: 'Europe', owned: false, progress: 0 },
+  { name: 'Afrique', owned: false, progress: 0 },
+  { name: 'Asie', owned: false, progress: 0 },
+  { name: 'Océanie', owned: false, progress: 0 }
+];
+	const continentCost = 3000000;
+	const continentIncome = 500000;
+
+    function updateEscortsUI(){
+      if(!escortsPanelEl) return;
+      trixyStatusEl.textContent = trixyOwned ? (trixyBoosted ? 'Trixy boostée' : 'Trixy recrutée') : 'Non achetée';
+      trixyInfoEl.textContent = trixyOwned ? 'Trixy travaille pour toi.' : 'Acheter Trixy pour démarrer ses revenus passifs.';
+      buyTrixyBtn.style.display = trixyOwned ? 'none' : 'inline-block';
+      trixyPressureBtn.style.display = (trixyOwned && !trixyBoosted) ? 'inline-block' : 'none';
+      trixyFavorBtn.style.display = (trixyOwned && !trixyFavor) ? 'inline-block' : 'none';
+      trixyStatsEl.style.display = trixyOwned ? 'block' : 'none';
+      trixyIncomeEl.textContent = trixyOwned ? (trixyBoosted ? 30 : 20) : 0;
+
+      const frozen = (typeof isFrozen==='function') ? isFrozen() : false;
+      [buyTrixyBtn, trixyPressureBtn, trixyFavorBtn].forEach(btn => { if(btn) btn.disabled = frozen; });
+      if(buyTrixyBtn) buyTrixyBtn.disabled = frozen || money < 10000;
+      if(trixyFavorBtn) trixyFavorBtn.disabled = frozen || money < 50;
+      if(trixyPressureBtn) trixyPressureBtn.disabled = frozen || armaments < 1;
+    }
+
+    buyTrixyBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || trixyOwned) return;
+      if(money >= 10000){
+        money -= 10000;
+        trixyOwned = true;
+        updateUI();
+      }
+    });
+
+    trixyPressureBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || !trixyOwned || trixyBoosted) return;
+      if(armaments >= 1){
+        armaments -= 1;
+        trixyBoosted = true; // permanent +10 €/s
+        updateUI();
+      }
+    });
+
+    trixyFavorBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || !trixyOwned || trixyFavor) return;
+      if(money >= 50){
+        money -= 50;
+        trixyFavor = true; // pressure rate /4
+        updateUI();
+      }
+    });
+	
+	// ======== SANTÉ ========
+	let health = 100; // niveau de santé initial
+	let healthMin = 10; // seuil minimum
+	let healthDropRate = 1; // % de perte par tick
+	let healthTickInterval = 10; // secondes entre chaque tick
+	let injectionCount = 0; // nombre de piqûres faites
+	let injectionBaseCost = 500000;
+	
+	// ======== ARMÉE ========
+	let soldiers = 0;
+	let soldiersPerBuy = 50;
+	let soldierCost = 500; // en bibicoins
+
+	// ======== ATTAQUES ========
+	let mafiaDefeated = false;
+	let sevranControlled = false;
+	
+	// ======== JUSTICE FRANÇAISE ========
+let justiceSuspicion = 0;          // % actuel
+let justiceActive = true;          // devient false si France conquise
+const justiceRate = 1;             // +1% par tick
+const justiceTick = 1200;          // 1 tick = 1.2s → 2 min pour atteindre 100%
+const corruptionCost = 1000000;    // 1M €
+let franceControlled = false;      // via Attaquer
+
+	// ======== DETTES (Palier 10 000 000 Aura) ========
+let debtsUnlocked = false;        // déverrouillé via Aura
+let debtsActive = false;          // cycle en cours
+const debtsPerCycle = 5;          // 5 dettes par cycle
+let debtsPaid = 0;                // dettes déjà payées dans le cycle
+const debtUnitCost = 100_000_000; // 100M € par dette
+const debtBaseDrain = 10_000_000; // ponction de base par minute
+let debtDrainTimer = 0;           // secondes accumulées
+let francMaconDealAccepted = false;   // choix du popup (OK=accepté)
+let francMaconVengeancePending = false; // si refus, teaser pour la suite
+
+// ======== CLUB DU PSG ========
+let clubUnlocked = false;
+let clubPSGPercent = 0;
+const clubPSGCostPerPercent = 100000000;
+const clubPSGIncomePerPercent = 30000;
+
+// ======== CAMP D’ENTRAÎNEMENT ========
+let campUnlocked = false;
+let campOwned = false;
+let campLevel = 1;
+const campBuyCost = 100000000;
+const campUpgradeCostBase = 100000000;
+
+// ======== CARTEL MEXICAIN ========
+let mexicanCartelUnlocked = false;
+let mexicanCartelActive = false;
+let cartelChoice = null; // "accept" ou "refuse"
+let cartelDefeated = false;
+let cartelDrainTimer = 0;
+let cartelPassiveIncome = 0; // devient 1 000 000 €/s après victoire
+
+// ======== CAMP MEXICAIN ========
+let campMexicainUnlocked = false;
+let campMexicainOwned = false;
+let campMexicainLevel = 0;
+let campMexicainBaseProd = 1; // soldats/s
+let campMexicainPrice = 100_000_000;
+let campMexicainUpgradeCost = 100_000_000;
+
+
+// ======== CAMP MEXICAIN ========
+let campMexUnlocked = false;
+let campMexOwned = false;
+let campMexLevel = 1;
+const campMexBuyCost = 100000000;
+const campMexUpgradeCostBase = 100000000;
+
+// ======== AUTRES CAMPS ========
+let camp2Unlocked = false, camp2Owned = false, camp2Level = 1;
+let camp3Unlocked = false, camp3Owned = false, camp3Level = 1;
+let camp4Unlocked = false, camp4Owned = false, camp4Level = 1;
+let camp5Unlocked = false, camp5Owned = false, camp5Level = 1;
+
+let freemasonUnlocked = false;
+let freemasonDefeated = false;
+
+
+
+
+
+
+
+
+    // Trixy production tick (every second)
+    setInterval(()=>{
+      if((typeof isFrozen==='function' && isFrozen())) return;
+      if(!trixyOwned) return;
+      let need = Math.max(0, 2 - bags);
+      if(need > 0){
+        const canBuy = Math.min(need, Math.floor(money / 5));
+        if(canBuy > 0){ money -= canBuy * 5; bags += canBuy; }
+      }
+      if(bags >= 2){
+        bags -= 2;
+        const gain = (trixyBoosted ? 30 : 20);
+        money += gain;
+        revenue += gain;
+        updateUI();
+      } else { updateUI(); }
+    }, 1000);
+
+    // ======= NOUVELLE ESCORTE - Sophia =======
+    let sophiaOwned = false;
+    let sophiaBoosted = false; // +10 €/s permanent
+    let sophiaFavor = false;   // tension rate /4
+
+    const sophiaPanelEl = document.getElementById('sophiaPanel');
+    const buySophiaBtn = document.getElementById('buySophiaBtn');
+    const sophiaPressureBtn = document.getElementById('sophiaPressureBtn');
+    const sophiaFavorBtn = document.getElementById('sophiaFavorBtn');
+    const sophiaStatusEl = document.getElementById('sophiaStatus');
+    const sophiaInfoEl = document.getElementById('sophiaInfo');
+    const sophiaStatsEl = document.getElementById('sophiaStats');
+    const sophiaIncomeEl = document.getElementById('sophiaIncome');
+
+    function updateSophiaUI(){
+      if(!sophiaPanelEl) return;
+      sophiaStatusEl.textContent = sophiaOwned ? (sophiaBoosted ? 'Sophia boostée' : 'Sophia recrutée') : 'Non achetée';
+      sophiaInfoEl.textContent = sophiaOwned ? 'Sophia travaille pour toi.' : 'Acheter Sophia pour démarrer ses revenus passifs.';
+      buySophiaBtn.style.display = sophiaOwned ? 'none' : 'inline-block';
+      sophiaPressureBtn.style.display = (sophiaOwned && !sophiaBoosted) ? 'inline-block' : 'none';
+      sophiaFavorBtn.style.display = (sophiaOwned && !sophiaFavor) ? 'inline-block' : 'none';
+      sophiaStatsEl.style.display = sophiaOwned ? 'block' : 'none';
+      sophiaIncomeEl.textContent = sophiaOwned ? (sophiaBoosted ? 30 : 20) : 0;
+
+      const frozen = (typeof isFrozen==='function') ? isFrozen() : false;
+      [buySophiaBtn, sophiaPressureBtn, sophiaFavorBtn].forEach(btn => { if(btn) btn.disabled = frozen; });
+      if(buySophiaBtn) buySophiaBtn.disabled = frozen || money < 10000;
+      if(sophiaFavorBtn) sophiaFavorBtn.disabled = frozen || money < 50;
+      if(sophiaPressureBtn) sophiaPressureBtn.disabled = frozen || armaments < 1;
+    }
+
+    buySophiaBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || sophiaOwned) return;
+      if(money >= 10000){
+        money -= 10000;
+        sophiaOwned = true;
+        updateUI();
+      }
+    });
+
+    sophiaPressureBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || !sophiaOwned || sophiaBoosted) return;
+      if(armaments >= 1){
+        armaments -= 1;
+        sophiaBoosted = true;
+        updateUI();
+      }
+    });
+
+    sophiaFavorBtn?.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen()) || !sophiaOwned || sophiaFavor) return;
+      if(money >= 50){
+        money -= 50;
+        sophiaFavor = true; // tension rate /4
+        updateUI();
+      }
+    });
+
+    // Revenus passifs de Sophia (identique à Trixy)
+    setInterval(()=>{
+      if((typeof isFrozen==='function' && isFrozen())) return;
+      if(!sophiaOwned) return;
+      let need = Math.max(0, 2 - bags);
+      if(need > 0){
+        const canBuy = Math.min(need, Math.floor(money / 5));
+        if(canBuy > 0){ money -= canBuy * 5; bags += canBuy; }
+      }
+      if(bags >= 2){
+        bags -= 2;
+        const gain = (sophiaBoosted ? 30 : 20);
+        money += gain;
+        revenue += gain;
+        updateUI();
+      } else { updateUI(); }
+    }, 1000);
+	// ======= NOUVELLE ESCORTE - Émilie =======
+let emilieOwned = false;
+let emilieBoosted = false;
+let emilieHealth = 0;
+let emilieFirstPopupShown = false; // ✅ popup affichée une seule fois
+
+const emiliePanelEl = document.getElementById('emiliePanel');
+const buyEmilieBtn = document.getElementById('buyEmilieBtn');
+const emilieBoostBtn = document.getElementById('emilieBoostBtn');
+const emilieStatusEl = document.getElementById('emilieStatus');
+const emilieInfoEl = document.getElementById('emilieInfo');
+const emilieStatsEl = document.getElementById('emilieStats');
+const emilieIncomeEl = document.getElementById('emilieIncome');
+const emilieHealthFill = document.getElementById('emilieHealthFill');
+const emilieHealthVal = document.getElementById('emilieHealthVal');
+const emilieResetBtn = document.getElementById('emilieResetBtn');
+
+function updateEmilieUI(){
+  if(!emiliePanelEl) return;
+
+  emilieStatusEl.textContent = emilieOwned ? (emilieBoosted ? 'Émilie boostée' : 'Émilie recrutée') : 'Non achetée';
+  emilieInfoEl.textContent = emilieOwned ? 'Émilie travaille pour toi.' : 'Acheter Émilie pour démarrer ses revenus passifs.';
+  buyEmilieBtn.style.display = emilieOwned ? 'none' : 'inline-block';
+  emilieBoostBtn.style.display = (emilieOwned && !emilieBoosted) ? 'inline-block' : 'none';
+  emilieStatsEl.style.display = emilieOwned ? 'block' : 'none';
+  emilieIncomeEl.textContent = emilieOwned ? (emilieBoosted ? 1500 : 1000) : 0;
+
+  // Barre de vie
+  emilieHealthFill.style.width = emilieHealth + '%';
+  emilieHealthVal.textContent = Math.floor(emilieHealth);
+  emilieHealthFill.style.background = emilieHealth >= 100 ? '#c1121f' : '#2b9348';
+  emilieResetBtn.style.display = emilieHealth >= 100 ? 'inline-block' : 'none';
+
+  const frozen = isFrozen() || emilieHealth >= 100;
+  [buyEmilieBtn, emilieBoostBtn].forEach(btn => { if(btn) btn.disabled = frozen; });
+  if(buyEmilieBtn) buyEmilieBtn.disabled = frozen || money < 50000;
+  if(emilieBoostBtn) emilieBoostBtn.disabled = frozen || money < 20000;
+}
+
+buyEmilieBtn?.addEventListener('click', ()=>{
+  if(isFrozen() || emilieOwned) return;
+  if(money >= 50000){
+    money -= 50000;
+    emilieOwned = true;
+    updateUI();
+
+    // ✅ Message popup une seule fois
+    if(!emilieFirstPopupShown){
+      alert("💢 Emilie est amoureuse de vous, attention au business");
+      emilieFirstPopupShown = true;
+    }
+  }
+});
+
+emilieBoostBtn?.addEventListener('click', ()=>{
+  if(isFrozen() || !emilieOwned || emilieBoosted) return;
+  if(money >= 20000){
+    money -= 20000;
+    emilieBoosted = true;
+    updateUI();
+  }
+});
+
+// Barre de vie d'Émilie (1 % / 10s)
+setInterval(()=>{
+  if(!emilieOwned) return;
+  if(emilieHealth < 100){
+    emilieHealth += 1;
+    if(emilieHealth > 100) emilieHealth = 100;
+  }
+  updateEmilieUI();
+}, 10000);
+
+// Revenu automatique d'Émilie (bloqué si sa barre est à 100 %)
+setInterval(()=>{
+  if(isFrozen() || !emilieOwned || emilieHealth >= 100) return;
+  let need = Math.max(0, 2 - bags);
+  if(need > 0){
+    const canBuy = Math.min(need, Math.floor(money / 5));
+    if(canBuy > 0){ money -= canBuy * 5; bags += canBuy; }
+  }
+  if(bags >= 2){
+    bags -= 2;
+    const gain = (emilieBoosted ? 1500 : 1000);
+    money += gain;
+    revenue += gain;
+    updateUI();
+  }
+}, 1000);
+
+// Frapper Émilie : remet à 0 %
+emilieResetBtn?.addEventListener('click', ()=>{
+  emilieHealth = 0;
+  updateEmilieUI();
+  updateUI();
+});
+
+    // ======= Récompenses d’Aura =======
+    const AURA_REWARDS = [
+      { id:'autoSeller', threshold:10, description:'Débloque un vendeur automatique 🤖', onClaim:()=>{ autoSellerUnlocked = true; } },
+      { id:'bonus500', threshold:20, description:'+500 € immédiats', onClaim:()=>{ money += 500; } },
+      { id:'upgradeSystem', threshold:40, description:'Débloque les améliorations 💼', onClaim:()=>{ document.getElementById('upgradePanel').style.display = 'block'; } },
+      { id:'autoBuyer', threshold:50, description:'Débloque un acheteur automatique de pochons 🛒', onClaim:()=>{ autoBuyerUnlocked = true; } },
+      { id:'chemists', threshold:100, description:'Débloque les employés de production 👨‍🔬', onClaim:()=>{ document.getElementById('employeesPanel').style.display = 'block'; } },
+      { id:'factory', threshold:150, description:'Débloque la Factory 🏭', onClaim:()=>{ const fp=document.getElementById('factoryPanel'); fp.style.display='block'; fp.classList.add('fade-in'); } },
+      { id:'office', threshold:300, description:'Débloque le Bureau 🧠', onClaim:()=>{ const op=document.getElementById('officePanel'); op.style.display='block'; op.classList.add('fade-in'); } },
+      { id:'escorts', threshold:1000, description:'Débloque les Escortes 💋', onClaim:()=>{ const ep=document.getElementById('escortsPanel'); ep.style.display='block'; ep.classList.add('fade-in'); } },
+      { id:'casino', threshold:2000, description:'Débloque le Casino 🎰', onClaim:()=>{ const c=document.getElementById('casinoPanel'); c.style.display='block'; c.classList.add('fade-in'); } },
+      { id:'sophia', threshold:3000, description:'Débloque Sophia 💉', onClaim:()=>{ const sp=document.getElementById('sophiaPanel'); sp.style.display='block'; sp.classList.add('fade-in'); } },
+	  { id:'commerces', threshold:5000, description:'Débloque les Commerces 🏪', onClaim:()=>{ 
+			['chichaPanel','coffeePanel','stripPanel'].forEach(id=>{
+			const p=document.getElementById(id);
+			p.style.display='block';
+			p.classList.add('fade-in'); 
+			});
+			updateCommercesUI(); // 👈 AJOUT
+			} },
+	   { id:'harddrugs', threshold:10000, description:'Débloque les drogues dures 💀', onClaim:()=>{ 
+			['extazyPanel','cocainePanel'].forEach(id=>{
+			const p=document.getElementById(id);
+			p.style.display='block';
+			p.classList.add('fade-in');
+  });
+} },
+{ id:'emilie', threshold:7000, description:'Débloque Émilie 💃', onClaim:()=>{
+  const ep=document.getElementById('emiliePanel');
+  ep.style.display='block';
+  ep.classList.add('fade-in');
+} },
+{ id:'braqueurs', threshold:40000, description:'Débloque les Braqueurs 💣', onClaim:()=>{
+  const bp=document.getElementById('braqueurPanel');
+  bp.style.display='block';
+  bp.classList.add('fade-in');
+  updateBraqueurUI();
+}},
+{ id:'crypto', threshold:50000, description:'Débloque la Ferme à Crypto 💻', onClaim:()=>{ 
+  const cp=document.getElementById('cryptoPanel');
+  cp.style.display='block';
+  cp.classList.add('fade-in');
+} },
+{ id:'bibitrade', threshold:60000, description:'Débloque le Bibitrade 💱', onClaim:()=>{ 
+  const p=document.getElementById('bibitradePanel');
+  p.style.display='block';
+  p.classList.add('fade-in');
+  updateBibitradeUI();
+} },
+{ 
+  id:'family', 
+  threshold:100000, 
+  description:'Débloque le panneau Famille 👪', 
+  onClaim:()=>{ 
+    const fp=document.getElementById('familyPanel'); 
+    if(fp){ 
+      fp.style.display='block'; 
+      fp.classList.add('fade-in'); 
+    } 
+    updateFamilyUI(); 
+    saveGame(); 
+  } 
+},
+{
+  id: 'airport',
+  threshold: 500000,
+  description: 'Débloque le panneau Aéroport ✈️',
+  onClaim: () => {
+    const ap = document.getElementById('airportPanel');
+    if (ap) {
+      ap.style.display = 'block';
+      ap.classList.add('fade-in');
+    }
+    updateAirportUI();
+    saveGame();
+  }
+},
+{
+  id: 'managerChemists',
+  threshold: 1500000,
+  description: 'Débloque les Managers Chimistes 👔',
+  onClaim: () => {
+    const emp = document.getElementById('employeesPanel');
+    if(emp) emp.style.display = 'block';
+    alert('👔 Les Managers Chimistes sont disponibles dans le panneau Employés !');
+    saveGame();
+  }
+},
+{
+  id: 'health',
+  threshold: 2000000,
+  description: 'Débloque le panneau Santé 🩸',
+  onClaim: () => {
+    const hp = document.getElementById('healthPanel');
+    if (hp) {
+      hp.style.display = 'block';
+      hp.classList.add('fade-in');
+    }
+    updateHealthUI();
+    saveGame();
+  }
+},
+{
+  id: 'army',
+  threshold: 3000000,
+  description: 'Débloque le panneau Armée 👥',
+  onClaim: () => {
+    const ap = document.getElementById('armyPanel');
+    if (ap) ap.style.display = 'block';
+    saveGame();
+  }
+},
+{
+  id: 'attack',
+  threshold: 4000000,
+  description: 'Débloque le panneau Attaquer ⚔️',
+  onClaim: () => {
+    const atk = document.getElementById('attackPanel');
+    if (atk) atk.style.display = 'block';
+    saveGame();
+  }
+},
+{
+  id: 'justice',
+  threshold: 6000000,
+  description: 'Débloque la Justice Française ⚖️',
+  onClaim: () => {
+    const jp = document.getElementById('justicePanel');
+    if (jp) jp.style.display = 'block';
+    const ap = document.getElementById('attackPanel');
+    if (ap) ap.style.display = 'block'; // ✅ débloque aussi le panneau Attaquer
+    updateJusticeUI();
+    updateAttackUI(); // ✅ pour faire apparaître le bouton France immédiatement
+    saveGame();
+  }
+},
+
+{
+  id: 'debts',
+  threshold: 10000000,
+  description: 'Débloque les Dettes 📜',
+  onClaim: () => {
+    debtsUnlocked = true;
+    debtsActive = true;
+    debtsPaid = 0;
+    const dp = document.getElementById('debtsPanel');
+    if (dp) dp.style.display = 'block';
+    alert("📜 Mauvaise nouvelle… Tes fils ont fait de très mauvais choix. Tu dois régler leurs dettes : 5 x 100 000 000 €.\n\nPendant que tu t’en occupes, les Francs-maçons te ponctionnent automatiquement chaque minute.");
+    updateDebtsUI();
+    saveGame();
+  }
+},
+{
+  id: 'club',
+  threshold: 50000000,
+  description: 'Achete le PSG, pourcent par pourcent 🏟️',
+  onClaim: () => {
+    clubUnlocked = true;
+    const cp = document.getElementById('clubPanel');
+    if(cp) cp.style.display = 'block';
+    updateClubUI();
+    saveGame();
+  }
+},
+{
+  id: 'camp',
+  threshold: 80000000,
+  description: 'Débloque le Camp d’Entraînement 🏕️',
+  onClaim: () => {
+    campUnlocked = true;
+    const cp = document.getElementById('campPanel');
+    if(cp) cp.style.display = 'block';
+    updateCampUI();
+    saveGame();
+  }
+},
+{ 
+  id:'cartel', 
+  threshold:100000000, 
+  description:'Débloque le Camp Anti-Mexicain et la mission contre le Cartel Mexicain 🇲🇽', 
+  onClaim:()=>{ 
+    mexicanCartelUnlocked = true; 
+    const cm=document.getElementById('campMexicainPanel'); 
+    cm.style.display='block'; 
+    cm.classList.add('fade-in'); 
+    handleCartelChoice();
+    updateCampMexicainUI(); 
+    saveGame(); 
+  } 
+},
+// ======== NOUVEAUX CAMPS ========
+{
+  id: 'camps1500000',
+  threshold: 1500000,
+  description: 'Débloque deux nouveaux camps de soldats 🏕️🏕️',
+  onClaim: () => {
+    camp2Unlocked = true;
+    camp3Unlocked = true;
+    document.getElementById('camp2Panel').style.display = 'block';
+    document.getElementById('camp3Panel').style.display = 'block';
+    updateCamp2UI();
+    updateCamp3UI();
+    saveGame();
+  }
+},
+{
+  id: 'camps2000000',
+  threshold: 2000000,
+  description: 'Débloque deux camps d’élite supplémentaires 🎖️🎖️',
+  onClaim: () => {
+    camp4Unlocked = true;
+    camp5Unlocked = true;
+    document.getElementById('camp4Panel').style.display = 'block';
+    document.getElementById('camp5Panel').style.display = 'block';
+    updateCamp4UI();
+    updateCamp5UI();
+    saveGame();
+  }
+},
+{
+  id: 'freemasonAttack',
+  threshold: 3000000, // tu peux ajuster la valeur
+  description: 'Débloque la mission finale contre les Francs-Maçons 🕍',
+  onClaim: () => {
+    freemasonUnlocked = true;
+    const panel = document.getElementById('freemasonPanel');
+    if (panel) panel.style.display = 'block';
+    updateFreemasonUI();
+    saveGame();
+  }
+}
+];
+
+    // Garantit que les récompenses sont proposées dans l'ordre réel des paliers.
+    AURA_REWARDS.sort((a, b) => a.threshold - b.threshold);
+
+    const claimedRewards = {};
+
+    // ======= DOM =======
+    const moneyEl = document.getElementById('money');
+    const bagsEl = document.getElementById('bags');
+    const plantsEl = document.getElementById('plants');
+    const auraEl = document.getElementById('aura');
+
+    const sellControls = document.getElementById('sellControls');
+    const makePlantBtn = document.getElementById('makePlant');
+    const buyBagBtn = document.getElementById('buyBag');
+    const buyBag10Btn = document.getElementById('buyBag10');
+
+    const auraPanel = document.getElementById('auraPanel');
+    const auraNowEl = document.getElementById('auraNow');
+    const rewardDescEl = document.getElementById('rewardDesc');
+    const claimBtn = document.getElementById('claimBtn');
+
+    const upgradeLevelEl = document.getElementById('upgradeLevel');
+    const clientMultEl = document.getElementById('clientMult');
+    const upgradeCostEl = document.getElementById('upgradeCost');
+    const upgradeBtn = document.getElementById('upgradeBtn');
+
+    const chemistsEl = document.getElementById('chemists');
+    const chemistsPpsEl = document.getElementById('chemistsPps');
+    const chemistPriceEl = document.getElementById('chemistPrice');
+    const buyChemistBtn = document.getElementById('buyChemistBtn');
+    const pressureBtn = document.getElementById('pressureBtn');
+
+    const metalEl = document.getElementById('metal');
+    const armamentsEl = document.getElementById('armaments');
+    const buyMetalBtn = document.getElementById('buyMetalBtn');
+    const convertMetalBtn = document.getElementById('convertMetalBtn');
+
+    const resetBtn = document.getElementById('resetBtn');
+    const saveToast = document.getElementById('saveToast');
+
+    const revenueEl = document.getElementById('revenue'); // compteur CA
+
+    // ======= HELPERS =======
+    const aura = ()=> Math.floor(revenue / 100); // 1 aura = 100 € de CA
+    const formatMoney = (value)=> value >= 1000 ? (value/1000).toFixed(0)+'k' : value.toString();
+
+    let bulkBtnShown = false; // anim du bouton 10 pochons
+
+    function renderSellControls(){
+      sellControls.innerHTML = '';
+      if(!autoSellerUnlocked){
+        const btn = document.createElement('button');
+        btn.textContent = 'Vendre';
+        btn.id = 'sellBtn';
+        btn.disabled = !canSell || plants<=0;
+        btn.addEventListener('click', manualSellOnce);
+        sellControls.appendChild(btn);
+      } else {
+        const msg = document.createElement('div');
+        msg.className = 'auto-sell-text';
+        msg.textContent = 'Le vendeur s’occupe désormais des ventes automatiquement 🤖';
+        sellControls.appendChild(msg);
+      }
+    }
+
+    function updateUI(){
+      moneyEl.textContent = money.toFixed(0);
+      bagsEl.textContent = bags.toFixed(0);
+      plantsEl.textContent = plants.toFixed(0);
+      revenueEl.textContent = revenue.toFixed(0);
+      auraEl.textContent = aura();
+      if (auraNowEl) auraNowEl.textContent = aura();
+
+      // Panneau Aura visible à partir de 10 aura
+      auraPanel.style.display = aura() >= 10 ? 'block' : 'none';
+
+      // Bouton "Acheter 10 pochons (30 €)" à partir de 10 d'aura
+      if(aura() >= 10){
+        if(buyBag10Btn.style.display === 'none'){
+          buyBag10Btn.style.display = 'inline-block';
+          if(!bulkBtnShown){
+            buyBag10Btn.classList.add('fade-in');
+            bulkBtnShown = true;
+            setTimeout(()=>buyBag10Btn.classList.remove('fade-in'), 600);
+          }
+        }
+      } else {
+        buyBag10Btn.style.display = 'none';
+      }
+
+      // Upgrades
+      upgradeLevelEl.textContent = upgradeLevel;
+      clientMultEl.textContent = Math.pow(2, upgradeLevel);
+      upgradeCostEl.textContent = formatMoney(upgradeCost);
+	  const clientsEl = document.getElementById('clients');
+	  if (clientsEl) clientsEl.textContent = clientsPerSecond;
+
+
+      // Employés
+      chemistsEl.textContent = chemists;
+      chemistPriceEl.textContent = Math.max(1, Math.ceil(chemistPrice)).toLocaleString('fr-FR');
+      
+	  // Production totale (chimistes + managers)
+const chemistPer10 = chemists * (chemistBasePer10 + pressureBonus);
+const chemistPerSec = chemistPer10 / 10;
+
+// Managers Chimistes (s’ils existent)
+const managerPer10 = chemistManagers * ((chemistBasePer10 + pressureBonus) * 2);
+const managerPerSec = managerPer10 / 10;
+
+// Total combiné
+const totalPerSec = chemistPerSec + managerPerSec;
+
+// Affichage fusionné
+chemistsPpsEl.textContent = totalPerSec.toFixed(2);
+
+	  
+	// Managers Chimistes — visibles uniquement si le palier 1 500 000 Aura est atteint ou débloqué
+let managersSection = document.getElementById('managersSection');
+if (!managersSection) {
+  const employeesPanel = document.getElementById('employeesPanel');
+  managersSection = document.createElement('div');
+  managersSection.id = 'managersSection';
+  employeesPanel.appendChild(managersSection);
+}
+
+if (claimedRewards['managerChemists']) {
+  const managersPer10 = chemistManagers * ((chemistBasePer10 + pressureBonus) * 2);
+  const managersPerSec = managersPer10 / 10;
+
+  managersSection.innerHTML = `
+    <div style="margin-top:8px;border-top:1px solid #444;padding-top:8px;">
+      <div>👔 Managers Chimistes : <strong>${chemistManagers}</strong></div>
+      <div>Production : +${managersPerSec.toFixed(2)} “10” /s</div>
+      <div>Coût : ${Math.ceil(chemistManagerPrice).toLocaleString('fr-FR')} €</div>
+      <button id="buyManagerBtn">Acheter un Manager Chimiste</button>
+    </div>
+  `;
+
+  document.getElementById('buyManagerBtn')?.addEventListener('click', ()=> {
+    if(money >= chemistManagerPrice){
+      money -= chemistManagerPrice;
+      chemistManagers += 1;
+      chemistManagerPrice = Math.ceil(chemistManagerPrice * 1.5);
+      updateUI();
+      saveGame();
+    }
+  });
+} else {
+  managersSection.innerHTML = `
+    <div style="margin-top:8px;color:#777;font-size:14px;">
+      🔒 Managers Chimistes disponibles à 1 500 000 Aura
+    </div>
+  `;
+}
+
+      // Factory panel (visible si récompense déjà réclamée, sinon quand aura >= 150)
+      const factoryPanel = document.getElementById('factoryPanel');
+      if(claimedRewards['factory']){
+        factoryPanel.style.display = 'block';
+      } else {
+        factoryPanel.style.display = 'none';
+      }
+      metalEl.textContent = metal.toFixed(0);
+      armamentsEl.textContent = armaments.toFixed(0);
+
+      // Récompenses
+      const unclaimed = AURA_REWARDS.filter(r => !claimedRewards[r.id]);
+      if (unclaimed.length > 0) {
+        const next = unclaimed[0];
+        const locked = aura() < next.threshold;
+        rewardDescEl.innerHTML = locked
+          ? `Prochaine récompense : Palier <strong>${next.threshold}</strong> — ${next.description}`
+          : `Récompense disponible : Palier <strong>${next.threshold}</strong> — ${next.description}`;
+        claimBtn.disabled = locked;
+        claimBtn.onclick = () => {
+		if (aura() >= next.threshold) {
+		claimedRewards[next.id] = true;
+		next.onClaim();
+		renderSellControls();
+		updateUI();
+		saveGame(); // ✅ Sauvegarde immédiate du déblocage
+  }
+};
+
+      } else {
+        rewardDescEl.textContent = 'Toutes les récompenses actuelles ont été débloquées.';
+        claimBtn.disabled = true;
+      }
+
+      renderSellControls();
+      if (typeof updateBureauUI === 'function') updateBureauUI();
+      if (typeof updateEscortsUI === 'function') updateEscortsUI();
+      if (typeof updateSophiaUI === 'function') updateSophiaUI();
+	  if (typeof updateEmilieUI === 'function') updateEmilieUI();
+	  
+	  if (typeof updateFamilyUI === 'function') updateFamilyUI();
+	  if (typeof updateAirportUI === 'function') updateAirportUI();
+
+	  
+    }
+// ======== CAMP D’ENTRAÎNEMENT ========
+// Implémentation unique conservée plus bas avec achat, amélioration et production contrôlée.
+
+
+    // ======= ACTIONS =======
+    function manualSellOnce(){
+      if(!canSell || plants<=0 || (typeof isFrozen==='function' && isFrozen())) return;
+      canSell = false;
+      const toSell = Math.min(plants, clientsPerSecond);
+      const gain = toSell * sellPrice();
+      plants -= toSell;
+      money += gain;
+      revenue += gain; // ajoute au CA
+      updateUI();
+      setTimeout(()=>{ canSell = true; updateUI(); }, 1000);
+    }
+
+    // Vente automatique chaque seconde si vendeur débloqué
+    setInterval(()=>{
+      if((typeof isFrozen==='function' && isFrozen())) return;
+      if(autoSellerUnlocked && plants>0){
+        const toSell = Math.min(plants, clientsPerSecond);
+        const gain = toSell * sellPrice();
+        plants -= toSell;
+        money += gain;
+        revenue += gain; // CA
+        updateUI();
+      }
+    }, 1000);
+
+    // Production manuelle d'un "10"
+    makePlantBtn.addEventListener('click', ()=>{
+      if((typeof isFrozen==='function' && isFrozen())){ return; }
+      if(bags>=1){
+        bags--; plants++; totalPlants++; updateUI();
+      } else if(autoBuyerUnlocked && money >= 5){
+        money -= 5;
+        plants++; totalPlants++; updateUI();
+      }
+    });
+
+    // Achat de pochon
+    buyBagBtn.addEventListener('click', ()=>{ if((typeof isFrozen==='function' && isFrozen())) return;
+      if(money>=5){ money-=5; bags++; updateUI(); }
+    });
+
+    // Achat groupé de 10 pochons (30 €), débloqué à 10 Aura
+    buyBag10Btn.addEventListener('click', ()=>{ if((typeof isFrozen==='function' && isFrozen())) return;
+      if(money>=30){ money-=30; bags+=10; updateUI(); }
+    });
+
+    // Upgrade: double les clients/sec, coût x2
+    upgradeBtn.addEventListener('click', ()=>{ if((typeof isFrozen==='function' && isFrozen())) return;
+      if(money >= upgradeCost){
+        money -= upgradeCost;
+        upgradeLevel++;
+        clientsPerSecond = 1 * Math.pow(2, upgradeLevel);
+        upgradeCost *= 2;
+        updateUI();
+      }
+    });
+
+    // Acheter un chimiste (prix +50% à chaque achat)
+    buyChemistBtn.addEventListener('click', ()=>{ if((typeof isFrozen==='function' && isFrozen())) return;
+      const price = Math.ceil(chemistPrice);
+      if(money >= price){
+        money -= price;
+        chemists += 1;
+        chemistPrice = Math.ceil(price * 1.5);
+        updateUI();
+      }
+    });
+
+    // Mettre la pression: nécessite 1 armement, +1 par 10s pour tous
+    pressureBtn.addEventListener('click', ()=>{ if((typeof isFrozen==='function' && isFrozen())) return;
+      if(armaments >= 1){
+        armaments -= 1;
+        pressureBonus += 1;
+        updateUI();
+      }
+    });
+
+    // Production automatique des chimistes toutes les 10 s
+    setInterval(()=>{
+      if((typeof isFrozen==='function' && isFrozen())) return;
+      if(chemists <= 0) return;
+      const wantToProduce = chemists * (chemistBasePer10 + pressureBonus);
+      let need = Math.max(0, wantToProduce - bags);
+      if(need > 0 && autoBuyerUnlocked){
+        const canBuy = Math.min(need, Math.floor(money / 5));
+        if(canBuy > 0){
+          money -= canBuy * 5;
+          bags += canBuy;
+        }
+      }
+      const producible = Math.min(wantToProduce, bags);
+      if(producible > 0){
+        bags -= producible;
+        plants += producible;
+        totalPlants += producible;
+        updateUI();
+      }
+    }, 10000);
+	
+	// Production automatique des Managers Chimistes toutes les 10 s
+	setInterval(()=>{
+	if((typeof isFrozen==='function' && isFrozen())) return;
+	if(chemistManagers <= 0) return;
+
+	const wantToProduce = chemistManagers * ((chemistBasePer10 + pressureBonus) * 2);
+	let need = Math.max(0, wantToProduce - bags);
+	if(need > 0 && autoBuyerUnlocked){
+		const canBuy = Math.min(need, Math.floor(money / 5));
+		if(canBuy > 0){
+		money -= canBuy * 5;
+		bags += canBuy;
+		}
+	}
+
+	const producible = Math.min(wantToProduce, bags);
+	if(producible > 0){
+		bags -= producible;
+		plants += producible;
+		totalPlants += producible;
+		updateUI();
+	}
+	}, 10000);
+
+
+    // Factory
+    buyMetalBtn.addEventListener('click', ()=>{
+      if(money >= 2000){
+        money -= 2000;
+        metal += 1000;
+        updateUI();
+      }
+    });
+
+    convertMetalBtn.addEventListener('click', ()=>{
+      if(metal >= 750){
+        metal -= 750;
+        armaments += 1;
+        updateUI();
+      }
+    });
+
+    // ======= BUREAU (Pression/Tension) =======
+    let pressure = 0;   // 0..100
+    let strain = 0;     // 0..100
+    let officeUnlocked = false;
+
+    const officePanel = document.getElementById('officePanel');
+    const pressureFill = document.getElementById('pressureFill');
+    const pressureVal = document.getElementById('pressureVal');
+    const strainFill = document.getElementById('strainFill');
+    const strainVal = document.getElementById('strainVal');
+    const relieveBtn = document.getElementById('relieveBtn'); // 💦
+    const drugBtn = document.getElementById('drugBtn');       // 💊
+
+    function isFrozen(){ return (pressure >= 100) || (strain >= 100); }
+
+    function updateBureauUI(){
+      officeUnlocked = officeUnlocked || claimedRewards['office'];
+      officePanel.style.display = officeUnlocked ? 'block' : 'none';
+
+      if(pressure > 100) pressure = 100;
+      if(strain > 100) strain = 100;
+
+      pressureFill.style.width = pressure + '%';
+      strainFill.style.width = strain + '%';
+
+      if(pressure < 50){ pressureFill.style.background = '#2b9348'; }
+      else if(pressure < 80){ pressureFill.style.background = '#ff7b00'; }
+      else { pressureFill.style.background = '#c1121f'; }
+
+      pressureVal.textContent = Math.floor(pressure);
+      strainVal.textContent = Math.floor(strain);
+
+      const frozen = isFrozen();
+      relieveBtn.style.display = (pressure >= 100) ? 'inline-block' : 'none';
+      drugBtn.style.display = (strain >= 100) ? 'inline-block' : 'none';
+      drugBtn.disabled = !(strain >= 100 && money >= 10);
+
+      const allBtns = Array.from(document.querySelectorAll('button'));
+      const allowIds = new Set(['relieveBtn','drugBtn','resetBtn']);
+      allBtns.forEach(b=>{ if(!allowIds.has(b.id)) b.disabled = frozen; });
+    }
+
+    relieveBtn?.addEventListener('click', ()=>{
+      if(pressure >= 100){
+        pressure = 0;
+        updateBureauUI();
+        updateUI();
+      }
+    });
+
+    drugBtn?.addEventListener('click', ()=>{
+      if(strain >= 100 && money >= 10){
+        money -= 10;
+        strain = 0;
+        updateBureauUI();
+        updateUI();
+      }
+    });
+
+    // Timers pour Bureau (1 s)
+    setInterval(()=>{
+      if(!claimedRewards['office']) return;
+      if(pressure < 100) pressure = Math.min(100, pressure + (trixyFavor ? 0.5 : 2));
+      if(strain < 100)   strain   = Math.min(100, strain   + (sophiaFavor ? 0.25 : 1)); // ✅ ralentit x4 si faveur Sophia
+      updateBureauUI();
+      updateUI();
+    }, 1000);
+
+    // ======= CASINO =======
+    const casinoPanel = document.getElementById('casinoPanel');
+    const betInput = document.getElementById('casinoBet');
+    const betRedBtn = document.getElementById('betRedBtn');
+    const betBlackBtn = document.getElementById('betBlackBtn');
+    const casinoResult = document.getElementById('casinoResult');
+
+    function playCasino(playerChoice){
+      const bet = parseInt(betInput.value);
+      if(isNaN(bet) || bet <= 0){
+        casinoResult.textContent = "❌ Mise invalide.";
+        return;
+      }
+      if(money < bet){
+        casinoResult.textContent = "💸 Tu n’as pas assez d’argent.";
+        return;
+      }
+      money -= bet;
+      const outcome = Math.random() < 0.5 ? 'Rouge' : 'Noir';
+      if(outcome === playerChoice){
+        const gain = bet * 2;
+        money += gain;
+        revenue += gain;
+        casinoResult.textContent = `🎉 ${outcome} ! Tu gagnes ${gain} € !`;
+      } else {
+        casinoResult.textContent = `😢 ${outcome} ! Tu perds ta mise de ${bet} €...`;
+      }
+      updateUI();
+    }
+
+    betRedBtn?.addEventListener('click', ()=>{ if(!isFrozen()) playCasino('Rouge'); });
+    betBlackBtn?.addEventListener('click', ()=>{ if(!isFrozen()) playCasino('Noir'); });
+
+    // ======= SAUVEGARDE =======
+    const SAVE_KEY = 'bibi_save_v6_sophia'; // nouvelle version
+    function saveGame(showToast=true){
+      const data = {
+        money, bags, plants, totalPlants, revenue,
+        upgradeLevel, upgradeCost,
+        autoSellerUnlocked, autoBuyerUnlocked,
+        chemists, chemistPrice, pressureBonus,
+        metal, armaments, pressure, strain,
+        trixyOwned, trixyBoosted, trixyFavor,
+        sophiaOwned, sophiaBoosted, sophiaFavor,
+		emilieOwned, emilieBoosted, emilieHealth, emilieFirstPopupShown,
+		commerces, drugs, braqueurs, bibicoin, cryptoFarms, bibitradeRate, bibitradeTimer,
+		marriedToKim, familyChildren, childTokens, familyPassive, airportOwned, continents,
+		health, healthMin, healthDropRate, healthTickInterval, injectionCount,
+		soldiers, soldiersPerBuy, soldierCost, mafiaDefeated, sevranControlled,
+		chemistManagers, chemistManagerPrice, justiceSuspicion, justiceActive, franceControlled,
+		debtsUnlocked, debtsActive, debtsPaid, francMaconDealAccepted, francMaconVengeancePending,
+		clubUnlocked, clubPSGPercent, campUnlocked, campOwned, campLevel,
+        mexicanCartelUnlocked, mexicanCartelActive, cartelChoice, cartelDefeated, cartelDrainTimer, cartelPassiveIncome,
+        campMexicainUnlocked, campMexicainOwned, campMexicainLevel, campMexicainPrice,
+        camp2Unlocked, camp2Owned, camp2Level, camp3Unlocked, camp3Owned, camp3Level,
+        camp4Unlocked, camp4Owned, camp4Level, camp5Unlocked, camp5Owned, camp5Level,
+        freemasonUnlocked, freemasonDefeated,
+
+        claimed: Object.keys(claimedRewards).filter(k=>claimedRewards[k]===true)
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      if(showToast){
+        saveToast.style.display = 'block';
+        setTimeout(()=>{ saveToast.style.display = 'none'; }, 1500);
+      }
+    }
+    function loadGame(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+
+    // --- Données de base
+    money = d.money ?? money;
+    bags = d.bags ?? bags;
+    plants = d.plants ?? plants;
+    totalPlants = d.totalPlants ?? totalPlants;
+    revenue = d.revenue ?? revenue;
+
+    upgradeLevel = d.upgradeLevel ?? upgradeLevel;
+    upgradeCost = d.upgradeCost ?? upgradeCost;
+    autoSellerUnlocked = d.autoSellerUnlocked ?? autoSellerUnlocked;
+    autoBuyerUnlocked = d.autoBuyerUnlocked ?? autoBuyerUnlocked;
+    chemists = d.chemists ?? chemists;
+    chemistPrice = d.chemistPrice ?? chemistPrice;
+    pressureBonus = d.pressureBonus ?? pressureBonus;
+
+	chemistManagers = d.chemistManagers ?? chemistManagers;
+	chemistManagerPrice = d.chemistManagerPrice ?? chemistManagerPrice;
+
+    metal = d.metal ?? metal;
+    armaments = d.armaments ?? armaments;
+    pressure = d.pressure ?? pressure;
+    strain = d.strain ?? strain;
+	
+	bibicoin = d.bibicoin ?? bibicoin;
+	cryptoFarms = d.cryptoFarms ?? cryptoFarms;
+	bibitradeRate = d.bibitradeRate ?? bibitradeRate;
+	bibitradeTimer = d.bibitradeTimer ?? bibitradeTimer;
+
+    // --- Escortes
+    trixyOwned = d.trixyOwned ?? trixyOwned;
+    trixyBoosted = d.trixyBoosted ?? trixyBoosted;
+    trixyFavor = d.trixyFavor ?? trixyFavor;
+    sophiaOwned = d.sophiaOwned ?? sophiaOwned;
+    sophiaBoosted = d.sophiaBoosted ?? sophiaBoosted;
+    sophiaFavor = d.sophiaFavor ?? sophiaFavor;
+    emilieOwned = d.emilieOwned ?? emilieOwned;
+    emilieBoosted = d.emilieBoosted ?? emilieBoosted;
+    emilieHealth = d.emilieHealth ?? emilieHealth;
+    emilieFirstPopupShown = d.emilieFirstPopupShown ?? emilieFirstPopupShown;
+	
+	// --- Famille
+	marriedToKim = d.marriedToKim ?? marriedToKim;
+	familyChildren = d.familyChildren ?? familyChildren;
+	childTokens = d.childTokens ?? childTokens;
+	if (d.familyPassive && Array.isArray(d.familyPassive.projects)) {
+	familyPassive.projects = d.familyPassive.projects;
+	}
+	
+	// --- Aéroport
+	airportOwned = d.airportOwned ?? airportOwned;
+	if (Array.isArray(d.continents)) {
+	d.continents.forEach((c, i) => {
+    if (continents[i]) Object.assign(continents[i], c);
+	});
+	}
+	
+	// --- Santé
+	health = d.health ?? health;
+	healthMin = d.healthMin ?? healthMin;
+	healthDropRate = d.healthDropRate ?? healthDropRate;
+	healthTickInterval = d.healthTickInterval ?? healthTickInterval;
+	injectionCount = d.injectionCount ?? injectionCount;
+
+	// --- Soldats et armée
+	soldiers = d.soldiers ?? soldiers;
+	soldiersPerBuy = d.soldiersPerBuy ?? soldiersPerBuy;
+	soldierCost = d.soldierCost ?? soldierCost;
+	mafiaDefeated = d.mafiaDefeated ?? mafiaDefeated;
+	sevranControlled = d.sevranControlled ?? sevranControlled;
+	
+	justiceSuspicion = d.justiceSuspicion ?? justiceSuspicion;
+	justiceActive = d.justiceActive ?? justiceActive;
+	franceControlled = d.franceControlled ?? franceControlled;
+	
+	debtsUnlocked = d.debtsUnlocked ?? debtsUnlocked;
+	debtsActive = d.debtsActive ?? debtsActive;
+	debtsPaid = d.debtsPaid ?? debtsPaid;
+	francMaconDealAccepted = d.francMaconDealAccepted ?? francMaconDealAccepted;
+	francMaconVengeancePending = d.francMaconVengeancePending ?? francMaconVengeancePending;
+	clubUnlocked = d.clubUnlocked ?? clubUnlocked;
+	clubPSGPercent = d.clubPSGPercent ?? clubPSGPercent;
+	campUnlocked = d.campUnlocked ?? campUnlocked;
+	campOwned = d.campOwned ?? campOwned;
+	campLevel = d.campLevel ?? campLevel;
+	mexicanCartelUnlocked = d.mexicanCartelUnlocked ?? mexicanCartelUnlocked;
+	mexicanCartelActive = d.mexicanCartelActive ?? mexicanCartelActive;
+	cartelChoice = d.cartelChoice ?? cartelChoice;
+	cartelDefeated = d.cartelDefeated ?? cartelDefeated;
+	cartelDrainTimer = d.cartelDrainTimer ?? cartelDrainTimer;
+	cartelPassiveIncome = d.cartelPassiveIncome ?? cartelPassiveIncome;
+	campMexicainUnlocked = d.campMexicainUnlocked ?? campMexicainUnlocked;
+	campMexicainOwned = d.campMexicainOwned ?? campMexicainOwned;
+	campMexicainLevel = d.campMexicainLevel ?? campMexicainLevel;
+	campMexicainPrice = d.campMexicainPrice ?? campMexicainPrice;
+	camp2Unlocked = d.camp2Unlocked ?? camp2Unlocked;
+	camp2Owned = d.camp2Owned ?? camp2Owned;
+	camp2Level = d.camp2Level ?? camp2Level;
+	camp3Unlocked = d.camp3Unlocked ?? camp3Unlocked;
+	camp3Owned = d.camp3Owned ?? camp3Owned;
+	camp3Level = d.camp3Level ?? camp3Level;
+	camp4Unlocked = d.camp4Unlocked ?? camp4Unlocked;
+	camp4Owned = d.camp4Owned ?? camp4Owned;
+	camp4Level = d.camp4Level ?? camp4Level;
+	camp5Unlocked = d.camp5Unlocked ?? camp5Unlocked;
+	camp5Owned = d.camp5Owned ?? camp5Owned;
+	camp5Level = d.camp5Level ?? camp5Level;
+	freemasonUnlocked = d.freemasonUnlocked ?? freemasonUnlocked;
+	freemasonDefeated = d.freemasonDefeated ?? freemasonDefeated;
+
+
+
+    // --- Restaure le multiplicateur clients/sec
+    clientsPerSecond = 1 * Math.pow(2, upgradeLevel);
+
+    // --- Récompenses déjà réclamées
+    if(Array.isArray(d.claimed)){
+      d.claimed.forEach(id => { claimedRewards[id] = true; });
+
+      if(claimedRewards['upgradeSystem']) document.getElementById('upgradePanel').style.display = 'block';
+      if(claimedRewards['chemists']) document.getElementById('employeesPanel').style.display = 'block';
+      if(claimedRewards['factory']) document.getElementById('factoryPanel').style.display = 'block';
+      if(claimedRewards['office']) document.getElementById('officePanel').style.display = 'block';
+      if(claimedRewards['escorts']) document.getElementById('escortsPanel').style.display = 'block';
+      if(claimedRewards['casino']) document.getElementById('casinoPanel').style.display = 'block';
+      if(claimedRewards['sophia']) document.getElementById('sophiaPanel').style.display = 'block';
+      if(claimedRewards['emilie']) document.getElementById('emiliePanel').style.display = 'block';
+      if(claimedRewards['commerces']){
+        ['chichaPanel','coffeePanel','stripPanel'].forEach(id=>{
+          const p=document.getElementById(id);
+          if(p) p.style.display='block';
+        });
+      }
+      if(claimedRewards['harddrugs']){
+        ['extazyPanel','cocainePanel'].forEach(id=>{
+          const p=document.getElementById(id);
+          if(p) p.style.display='block';
+        });
+      }
+      if(claimedRewards['braqueurs']){
+        const bp=document.getElementById('braqueurPanel');
+        if(bp) bp.style.display='block';
+      }
+	    if(claimedRewards['crypto']){
+    const cp=document.getElementById('cryptoPanel');
+    if(cp) cp.style.display='block';
+  }
+		if(claimedRewards['bibitrade']){
+    const p=document.getElementById('bibitradePanel');
+    if(p) p.style.display='block';
+  }
+      if(claimedRewards['family']) document.getElementById('familyPanel').style.display = 'block';
+      if(claimedRewards['airport']) document.getElementById('airportPanel').style.display = 'block';
+      if(claimedRewards['managerChemists']) document.getElementById('employeesPanel').style.display = 'block';
+      if(claimedRewards['health']) document.getElementById('healthPanel').style.display = 'block';
+      if(claimedRewards['army']) document.getElementById('armyPanel').style.display = 'block';
+      if(claimedRewards['attack']) document.getElementById('attackPanel').style.display = 'block';
+      if(claimedRewards['justice']) document.getElementById('justicePanel').style.display = 'block';
+      if(claimedRewards['debts']) document.getElementById('debtsPanel').style.display = 'block';
+      if(claimedRewards['club']) document.getElementById('clubPanel').style.display = 'block';
+      if(claimedRewards['camp']) document.getElementById('campPanel').style.display = 'block';
+      if(claimedRewards['cartel']) document.getElementById('campMexicainPanel').style.display = 'block';
+      if(claimedRewards['camps1500000']) { document.getElementById('camp2Panel').style.display = 'block'; document.getElementById('camp3Panel').style.display = 'block'; }
+      if(claimedRewards['camps2000000']) { document.getElementById('camp4Panel').style.display = 'block'; document.getElementById('camp5Panel').style.display = 'block'; }
+      if(claimedRewards['freemasonAttack']) {
+        const fp = document.getElementById('freemasonPanel');
+        if(fp) fp.style.display = 'block';
+      }
+}
+
+    // --- Données des commerces / drogues / braqueurs (indépendant du reste)
+    if(Array.isArray(d.commerces)){
+      d.commerces.forEach((c, i) => commerces[i] = {...commerces[i], ...c});
+    }
+    if(Array.isArray(d.drugs)){
+      d.drugs.forEach((obj,i)=>drugs[i]={...drugs[i],...obj});
+    }
+    if(d.braqueurs){
+      Object.assign(braqueurs, d.braqueurs);
+    }
+
+  }catch(e){ 
+    console.warn('Impossible de charger la sauvegarde:', e); 
+  }
+}
+    // Auto-save toutes les 5s
+    setInterval(()=>saveGame(true), 5000);
+
+    // Nouvelle partie
+   resetBtn.addEventListener('click', ()=>{
+  if(confirm('Êtes-vous sûr de vouloir commencer une nouvelle partie ?')){
+    // Stoppe tous les intervals actifs
+    const highestInterval = setInterval(() => {}, 9999);
+    for (let i = 0; i <= highestInterval; i++) clearInterval(i);
+
+    // 🧹 Supprime toutes les sauvegardes
+    localStorage.removeItem('bibi_save_v5');
+    localStorage.removeItem('bibi_save_v6_sophia');
+    localStorage.removeItem('bibi_save_v7_clean');
+    localStorage.clear();
+
+    // 🔁 Recharge une partie vierge sans resauvegarder de bug
+    location.reload();
+  }
+    });
+	
+	// ======== COMMERCES ========
+
+const commerces = [
+  {id:'chicha', name:'Bar à Chicha', income:50, owned:false, life:0},
+  {id:'coffee', name:'Coffee Shop', income:50, owned:false, life:0},
+  {id:'strip', name:'Strip Club', income:50, owned:false, life:0}
+];
+
+function updateCommercesUI(){
+  commerces.forEach(c=>{
+    const panel=document.getElementById(c.id+'Panel');
+    const div=document.getElementById(c.id+'Content');
+    if(!panel||!div)return;
+    let html='';
+    if(!c.owned){
+      html+=`<button id="buy_${c.id}">Acheter ${c.name} (100K €)</button>`;
+    }else{
+      const lifePercent=Math.min(100,(c.life/60)*100);
+      html+=`<div>Revenus : +${c.income} €/s</div>`;
+      html+=`<div class="bar"><div class="bar-fill" style="width:${lifePercent}%;background:${lifePercent>=100?'#c1121f':'#2b9348'};"></div></div>`;
+      if(lifePercent>=100)html+=`<button id="repair_${c.id}">Reparer les degats de la mafia (1000 €)</button>`;
+    }
+    div.innerHTML=html;
+    if(!c.owned){
+      document.getElementById('buy_'+c.id)?.addEventListener('click',()=>{
+        if(money>=100000){money-=100000;c.owned=true;saveGame();updateCommercesUI();}
+      });
+    }else if(c.life>=60){
+      document.getElementById('repair_'+c.id)?.addEventListener('click',()=>{
+        if(money>=1000){money-=1000;c.life=0;saveGame();updateCommercesUI();}
+      });
+    }
+  });
+}
+
+setInterval(()=>{
+  commerces.forEach(c=>{
+    if(c.owned){
+      money += c.income;
+      revenue += c.income;
+
+      // ✅ Si la Mafia n’a pas encore été vaincue, les commerces se dégradent
+      if (!mafiaDefeated) {
+        c.life += 1;
+        if (c.life > 60) c.life = 60;
+      }
+    }
+  });
+  updateCommercesUI();
+  saveGame(false);
+},1000);
+
+// ======== DROGUES DURES ========
+// Extazy & Cocaïne débloquées à 10 000 Aura
+
+const drugs = [
+  { id:'extazy', name:'Extazy', income:100, owned:false, level:0, upgradeCost:200000 },
+  { id:'cocaine', name:'Cocaïne', income:100, owned:false, level:0, upgradeCost:200000 }
+];
+
+function updateDrugsUI(){
+  drugs.forEach(d=>{
+    const panel=document.getElementById(d.id+'Panel');
+    const div=document.getElementById(d.id+'Content');
+    if(!panel||!div)return;
+
+    let html='';
+    if(!d.owned){
+      html+=`<button id="buy_${d.id}">Acheter ${d.name} (100 000 €)</button>`;
+    }else{
+      html+=`<div>Revenus : +${d.income*(2**d.level)} €/s</div>`;
+      html+=`<div>Conso : ${1*(2**d.level)} pochon/s</div>`;
+      html+=`<button id="upgrade_${d.id}">Améliorer (${d.upgradeCost.toLocaleString('fr-FR')} €)</button>`;
+    }
+
+    div.innerHTML=html;
+
+    if(!d.owned){
+      document.getElementById('buy_'+d.id)?.addEventListener('click',()=>{
+        if(money>=100000){
+          money-=100000;
+          d.owned=true;
+          saveGame();
+          updateDrugsUI();
+        }
+      });
+    }else{
+      document.getElementById('upgrade_'+d.id)?.addEventListener('click',()=>{
+        if(money>=d.upgradeCost){
+          money-=d.upgradeCost;
+          d.level++;
+          d.upgradeCost*=2;
+          saveGame();
+          updateDrugsUI();
+        }
+      });
+    }
+  });
+}
+
+setInterval(()=>{
+  drugs.forEach(d=>{
+    if(d.owned){
+      const conso=1*(2**d.level);
+      if(bags>=conso){
+        bags-=conso;
+        const gain=d.income*(2**d.level);
+        money+=gain;
+        revenue+=gain;
+      }
+    }
+  });
+  updateDrugsUI();
+  saveGame(false);
+},1000);
+
+// ======== BRAQUEURS ========
+// Panneau débloqué à 40 000 Aura
+const braqueurs = {
+  count: 0,
+  max: 3,
+  hireCost: 30000,
+  upkeep: 20,      // coût par seconde
+  reward: 10000,   // gain toutes les 20 secondes
+  timer: 0         // compte les secondes pour les gains
+};
+
+function updateBraqueurUI(){
+  const panel = document.getElementById('braqueurPanel');
+  const div = document.getElementById('braqueurContent');
+  if(!panel || !div) return;
+
+  let html = `<div>👥 Braqueurs engagés : ${braqueurs.count}/${braqueurs.max}</div>`;
+  html += `<div>💸 Coût d'embauche : ${braqueurs.hireCost.toLocaleString('fr-FR')} €</div>`;
+  html += `<div>⏳ Consommation : ${braqueurs.upkeep} €/s chacun</div>`;
+  html += `<div>💰 Rapportent ${braqueurs.reward.toLocaleString('fr-FR')} € toutes les 20 s</div>`;
+
+  if(braqueurs.count < braqueurs.max){
+    html += `<button id="hireBraqueurBtn">Engager un braqueur (${braqueurs.hireCost.toLocaleString('fr-FR')} €)</button>`;
+  } else {
+    html += `<div class="info-text">Tous les braqueurs sont recrutés.</div>`;
+  }
+
+  div.innerHTML = html;
+
+  // Bouton d’embauche
+  document.getElementById('hireBraqueurBtn')?.addEventListener('click', ()=>{
+    if(money >= braqueurs.hireCost && braqueurs.count < braqueurs.max){
+      money -= braqueurs.hireCost;
+      braqueurs.count++;
+      updateUI();
+      updateBraqueurUI();
+    }
+  });
+}
+// Revenus et coûts automatiques
+setInterval(()=>{
+  if(braqueurs.count > 0){
+    // coût d’entretien
+    const upkeepTotal = braqueurs.count * braqueurs.upkeep;
+    if(money >= upkeepTotal){
+      money -= upkeepTotal;
+    } else {
+      // si pas assez d’argent, on perd un braqueur
+      braqueurs.count = Math.max(0, braqueurs.count - 1);
+    }
+
+    // timer de butin
+    braqueurs.timer++;
+    if(braqueurs.timer >= 20){
+      const gain = braqueurs.count * braqueurs.reward;
+      money += gain;
+      revenue += gain;
+      braqueurs.timer = 0;
+    }
+  }
+  updateBraqueurUI();
+  saveGame(false);
+},1000);
+
+// ======== FERME À CRYPTO ========
+// Panneau débloqué à 50 000 Aura
+
+function updateCryptoUI(){
+  const panel = document.getElementById('cryptoPanel');
+  const div = document.getElementById('cryptoContent');
+  if(!panel || !div) return;
+
+  let html = `
+    <div>💻 Fermes possédées : ${cryptoFarms}</div>
+    <div>💰 Coût d'une ferme : ${cryptoFarmCost.toLocaleString('fr-FR')} €</div>
+    <div>🪙 Bibicoins : ${bibicoin.toFixed(0)}</div>
+    <button id="buyFarmBtn">Acheter une ferme (${cryptoFarmCost.toLocaleString('fr-FR')} €)</button>
+  `;
+  div.innerHTML = html;
+
+  document.getElementById('buyFarmBtn')?.addEventListener('click', ()=>{
+    if(money >= cryptoFarmCost){
+      money -= cryptoFarmCost;
+      cryptoFarms++;
+      updateUI();
+      updateCryptoUI();
+      saveGame();
+    }
+  });
+}
+
+// Production automatique des bibicoins
+setInterval(()=>{
+  if(cryptoFarms > 0){
+    bibicoin += cryptoFarms;
+    updateCryptoUI();
+    saveGame(false);
+  }
+}, 1000);
+
+// Variation du taux Bibitrade : toutes les 5 s, entre 500 et 1500 €
+setInterval(()=>{
+  bibitradeTimer++;
+  if(bibitradeTimer >= 5){
+    bibitradeTimer = 0;
+    bibitradeRate = Math.floor(500 + Math.random() * 1000); // 500–1500 €
+    updateBibitradeUI();
+    saveGame(false);
+  }
+},1000);
+
+// ======== BIBITRADE ========
+function updateBibitradeUI(){
+  const panel = document.getElementById('bibitradePanel');
+  const div = document.getElementById('bibitradeContent');
+  if(!panel || !div) return;
+
+  div.innerHTML = `
+    <div>📉 Cours actuel (100 🪙) : <strong>${bibitradeRate.toLocaleString('fr-FR')} €</strong></div>
+    <div>🪙 Bibicoins : ${bibicoin.toFixed(0)}</div>
+    <div>💰 Argent : ${money.toLocaleString('fr-FR')} €</div>
+    <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button id="buy100BibicoinBtn">Acheter 100 🪙 (${bibitradeRate.toLocaleString('fr-FR')} €)</button>
+      <button id="sell100BibicoinBtn">Vendre Tout 🪙</button>
+    </div>
+  `;
+
+  // Achat de 100 bibicoins
+  document.getElementById('buy100BibicoinBtn')?.addEventListener('click', ()=>{
+    if(money >= bibitradeRate){
+      money -= bibitradeRate;
+      bibicoin += 100;
+      updateUI(); updateBibitradeUI(); saveGame();
+    }
+  });
+
+  // Vente de TOUS les bibicoins
+document.getElementById('sell100BibicoinBtn')?.addEventListener('click', ()=> {
+  if(bibicoin > 0){
+    const totalValue = (bibicoin / 100) * bibitradeRate;
+    money += totalValue;
+    revenue += totalValue;
+    alert(`💰 Tu as vendu ${bibicoin.toFixed(0)} 🪙 pour ${totalValue.toLocaleString('fr-FR')} € !`);
+    bibicoin = 0;
+    updateUI();
+    updateBibitradeUI();
+    saveGame();
+  } else {
+    alert("❌ Tu n’as aucun Bibicoin à vendre !");
+  }
+});
+}
+// ======== FAMILLE ========
+function updateFamilyUI(){
+  const panel = document.getElementById('familyPanel');
+  const div = document.getElementById('familyContent');
+  if(!panel || !div) return;
+
+  let html = `
+    <div>💍 Marié à Kim : ${marriedToKim ? 'Oui' : 'Non'}</div>
+    <div>👶 Enfants : ${familyChildren}/${maxChildren}</div>
+    <div>🎟️ Jetons enfant : ${childTokens}</div>
+    <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button id="marryKimBtn">${marriedToKim ? 'Déjà marié' : 'Se marier avec Kim (1 000 000 €)'}</button>
+      <button id="haveChildBtn">${familyChildren < maxChildren ? 'Faire un gosse' : 'Max atteint'}</button>
+    </div>
+  `;
+
+  if(childTokens > 0){
+    html += `
+      <div style="margin-top:12px;">🧾 Assigne un enfant à un projet (coûte 1 jeton)</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+        <button id="assignA">Projet Mbappé (revenu +10 000 €/s)</button>
+        <button id="assignB">Braquer des vieilles (revenu +10 000 €/s)</button>
+        <button id="assignC">Terrorisme en Iran (revenu +10 000 €/s)</button>
+      </div>
+    `;
+  }
+
+  div.innerHTML = html;
+
+  // 💍 Mariage
+  document.getElementById('marryKimBtn')?.addEventListener('click', ()=>{
+    if(marriedToKim) return;
+    if(money >= marriageCost){
+      money -= marriageCost;
+      marriedToKim = true;
+      alert('💍 Félicitations, Kim K est désormais ta femme, defonce lui la chatte !');
+      updateUI(); updateFamilyUI(); saveGame();
+    } else {
+      alert('💸 Tes trop pauvre clochard.');
+    }
+  });
+
+  // 👶 Faire un gosse
+  document.getElementById('haveChildBtn')?.addEventListener('click', ()=>{
+    if(!marriedToKim){ alert('Tu dois être marié à Kim d’abord.'); return; }
+    if(familyChildren >= maxChildren){ alert('Tu as déjà trois enfants.'); return; }
+
+    const auraLevel = aura();
+    const requiredAura = (familyChildren + 1) * 100000;
+    if(auraLevel < requiredAura){
+      alert(`🔒 Il faut ${requiredAura.toLocaleString('fr-FR')} Aura pour cet enfant.`);
+      return;
+    }
+
+    familyChildren++;
+    childTokens++;
+
+    const names = ['Inoxtag', 'Nik l\'Urssaf', 'Zidane'];
+    const name = names[familyChildren - 1];
+    alert(`🎉 Un nouvel enfant est né ! Il s'appelle ${name}.`);
+
+    updateUI(); updateFamilyUI(); saveGame();
+  });
+
+  // 👷 Assignations
+  const assign = (type, label)=>{
+    if(childTokens <= 0){ alert('Pas de jeton enfant disponible.'); return; }
+    childTokens--;
+    familyPassive.projects.push({type, label, income:10000, active:true});
+    alert(`✅ ${label} activé ! Revenu passif de 10 000 €/s.`);
+    updateUI(); updateFamilyUI(); saveGame();
+  };
+
+  document.getElementById('assignA')?.addEventListener('click', ()=>assign('mbappe','Projet Mbappé'));
+  document.getElementById('assignB')?.addEventListener('click', ()=>assign('bags','Voler des sacs'));
+  document.getElementById('assignC')?.addEventListener('click', ()=>assign('iran','Tourisme en Iran'));
+}
+
+// Revenus passifs des enfants
+setInterval(()=>{
+  if(familyPassive.projects.length === 0) return;
+  let total = 0;
+  for(const p of familyPassive.projects){
+    if(p.active) total += p.income;
+  }
+  if(total > 0){
+    money += total;
+    revenue += total;
+    updateUI();
+    saveGame(false);
+  }
+}, 1000);
+
+// ======== AÉROPORT ========
+function updateAirportUI() {
+  const panel = document.getElementById('airportPanel');
+  const div = document.getElementById('airportContent');
+  if (!panel || !div) return;
+
+  let html = `<div>🪙 Bibicoins : ${bibicoin.toLocaleString('fr-FR')}</div>`;
+  
+  if (!airportOwned) {
+    html += `<button id="buyAirportBtn">Acheter l’aéroport (20 000 🪙)</button>`;
+  } else {
+    html += `<div style="margin-top:10px;">🌍 Vendre ta drogue à l’international :</div>`;
+    continents.forEach((c, i) => {
+      if (!c.owned) {
+        html += `<button id="buyContinent_${i}">Vendre sa drogue en ${c.name} (3 000 000 €)</button><br>`;
+      } else {
+        const percent = Math.min(100, (c.progress / 30) * 100);
+        html += `
+          <div class="bar-label">${c.name}</div>
+          <div class="bar"><div class="bar-fill" style="width:${percent}%;background:${percent>=100?'#c1121f':'#2b9348'};"></div></div>
+          <div class="bar-num">${percent>=100 ? '💰 Gain imminent' : `Gain dans ${Math.ceil(30 - c.progress)}s`}</div>
+        `;
+      }
+    });
+  }
+
+  div.innerHTML = html;
+
+  // Achat de l’aéroport
+  document.getElementById('buyAirportBtn')?.addEventListener('click', ()=>{
+    if (bibicoin >= airportCost) {
+      bibicoin -= airportCost;
+      airportOwned = true;
+      alert('✈️ Tu as acheté ton aéroport international !');
+      updateUI(); updateAirportUI(); saveGame();
+    } else {
+      alert('🪙 Pas assez de bibicoins.');
+    }
+  });
+
+  // Achat de continents
+  continents.forEach((c, i) => {
+    document.getElementById(`buyContinent_${i}`)?.addEventListener('click', ()=>{
+      if (money >= continentCost) {
+        money -= continentCost;
+        c.owned = true;
+        c.progress = 0;
+        alert(`🌍 Tu vends maintenant ta drogue en ${c.name} !`);
+        updateUI(); updateAirportUI(); saveGame();
+      } else {
+        alert('💸 Pas assez d’argent.');
+      }
+    });
+  });
+}
+
+// ======== AÉROPORT : revenus automatiques ========
+setInterval(() => {
+  if (!airportOwned) return;
+
+  continents.forEach(c => {
+    if (c.owned) {
+      c.progress += 1;
+      if (c.progress >= 30) {
+        c.progress = 0;
+        money += continentIncome;
+        revenue += continentIncome;
+      }
+    }
+  });
+
+  updateAirportUI();
+  saveGame(false);
+}, 1000);
+
+// ======== SANTÉ ========
+function updateHealthUI() {
+  const panel = document.getElementById('healthPanel');
+  const fill = document.getElementById('healthFill');
+  const val = document.getElementById('healthVal');
+  const info = document.getElementById('healthInfo');
+  const btn = document.getElementById('injectBtn');
+  if (!panel || !fill || !val || !btn) return;
+
+  // couleur dynamique
+  let color = '#2b9348';
+  if (health <= 30) color = '#ff7b00';
+  if (health <= 15) color = '#c1121f';
+  fill.style.background = color;
+  fill.style.width = health + '%';
+  val.textContent = Math.floor(health);
+
+  // blocage à 10%
+  if (health <= healthMin) {
+    health = healthMin;
+    info.textContent = "🚨 Santé critique ! Il faut se piquer pour ralentir la chute.";
+    btn.disabled = false;
+  } else {
+    info.textContent = `💀 Santé : baisse de ${healthDropRate}% toutes les ${healthTickInterval}s`;
+  }
+
+  // coût de la piqûre
+  const nextCost = Math.floor(injectionBaseCost * Math.pow(1.01, injectionCount));
+  btn.textContent = `💉 Se piquer à l’héroïne (${nextCost.toLocaleString('fr-FR')} €)`;
+
+  btn.onclick = () => {
+    const cost = Math.floor(injectionBaseCost * Math.pow(1.01, injectionCount));
+    if (money >= cost) {
+      money -= cost;
+      injectionCount++;
+	  health = 100; // ✅ Restaure la santé à fond
+      healthDropRate = Math.max(0.5, healthDropRate - 0.1); // ralentit la chute
+      alert(`💉 Tu t'es piqué, ta santé se dégrade maintenant plus lentement.`);
+      updateUI(); updateHealthUI(); saveGame();
+    } else {
+      alert("💸 Pas assez d’argent !");
+    }
+  };
+}
+
+// diminution automatique de la santé
+setInterval(() => {
+  if (!claimedRewards['health']) return;
+  health -= healthDropRate;
+  if (health < healthMin) health = healthMin;
+  updateHealthUI();
+  saveGame(false);
+}, healthTickInterval * 1000);
+
+// ======== PANNEAU ARMÉE ========
+function updateArmyUI(){
+  const panel = document.getElementById('armyPanel');
+  const div = document.getElementById('armyContent');
+  if(!panel || !div) return;
+
+  div.innerHTML = `
+    <div>👥 Soldats : ${soldiers.toLocaleString('fr-FR')}</div>
+    <div>🪙 Coût du recrutement : ${soldierCost.toLocaleString('fr-FR')} Bibicoins</div>
+    <div>➕ Prochain recrutement : +${soldiersPerBuy.toLocaleString('fr-FR')} soldats</div>
+    <button id="buySoldiersBtn">Acheter ${soldiersPerBuy.toLocaleString('fr-FR')} soldats</button>
+  `;
+
+document.getElementById('buySoldiersBtn')?.addEventListener('click', ()=>{
+  if(bibicoin >= soldierCost){
+    bibicoin -= soldierCost;
+    soldiers += soldiersPerBuy;
+    soldierCost = Math.ceil(soldierCost * 1.5);
+    updateUI();
+    updateArmyUI();
+    saveGame();
+  } else {
+    alert('🪙 Pas assez de Bibicoins !');
+  }
+});
+
+}
+// Revenu passif de l'armée : 1 000 € par soldat toutes les 30 secondes
+setInterval(() => {
+  if (soldiers > 0) {
+    const gain = soldiers * 1000;
+    money += gain;
+    revenue += gain;
+    updateUI();
+    saveGame(false);
+  }
+}, 30000);
+
+// ======== PANNEAU ATTAQUER ========
+function updateAttackUI(){
+  const panel = document.getElementById('attackPanel');
+  const div = document.getElementById('attackContent');
+  if(!panel || !div) return;
+
+  let html = '';
+
+  if(!sevranControlled){
+    html += `<button id="attackSevranBtn">Conquérir Sevran (2 000 soldats) — Contrôle de la zone</button><br>`;
+  } else {
+    html += `<div>✅ Sevran est sous ton contrôle.</div>`;
+  }
+
+  if(!mafiaDefeated){
+    html += `<button id="attackMafiaBtn">Attaquer la Mafia (10 000 soldats) — Élimine les dégâts sur les commerces</button>`;
+  } else {
+    html += `<div>🔥 La Mafia a été écrasée, tes commerces sont protégés.</div>`;
+  }
+  
+  div.innerHTML = html;
+
+  // Conquête de Sevran
+  document.getElementById('attackSevranBtn')?.addEventListener('click', ()=>{
+    if(soldiers >= 2000){
+      soldiers -= 1000; // perd la moitié
+      sevranControlled = true;
+      alert("🏙️ Sevran est maintenant à toi !");
+      updateArmyUI(); updateAttackUI(); saveGame();
+    } else {
+      alert("Pas assez de soldats !");
+    }
+  });
+
+  // Attaque de la Mafia
+  document.getElementById('attackMafiaBtn')?.addEventListener('click', ()=>{
+    if(soldiers >= 10000){
+      soldiers -= 5000;
+      mafiaDefeated = true;
+      alert("💀 Tu as détruit la Mafia ! Tes commerces sont désormais intouchables.");
+      updateArmyUI(); updateAttackUI(); saveGame();
+    } else {
+      alert("Pas assez de soldats !");
+    }
+  });
+  
+  // === Ajout du bouton France ===
+if(!franceControlled){
+  html += `<button id="attackFranceBtn">Conquérir la France (500 000 soldats) — Figer la Justice</button>`;
+} else {
+  html += `<div>🇫🇷 La France est sous ton contrôle total.</div>`;
+}
+
+// === Bouton pour combattre le Cartel Mexicain ===
+if(mexicanCartelActive && !cartelDefeated){
+  html += `<button id="attackCartelBtn">Combattre l’Union des Cartels Mexicains (1 000 000 soldats)</button>`;
+} else if(cartelDefeated){
+  html += `<div>🇲🇽 Tu as détruit le Cartel ! Tes fils sont libres et tu gagnes 1 000 000 €/s.</div>`;
+}
+
+div.innerHTML = html;
+
+// === Gestion du clic ===
+document.getElementById('attackFranceBtn')?.addEventListener('click', ()=> {
+  if(soldiers >= 500000){
+    soldiers -= 250000;
+    franceControlled = true;
+    justiceActive = false;
+    alert("🇫🇷 Tu as conquis la France ! La Justice t'appartient, plus personne ne t'arrêtera.");
+    updateAttackUI();
+    updateJusticeUI();
+    updateUI();     // <-- rafraîchit l'affichage du money/revenue
+    saveGame();
+  } else {
+    alert("Pas assez de soldats pour attaquer la France !");
+  }
+});
+
+}
+
+// === Gestion du clic : attaquer le Cartel ===
+document.getElementById('attackCartelBtn')?.addEventListener('click', ()=>{
+  if(soldiers >= 1_000_000){
+    soldiers -= 1_000_000;
+    mexicanCartelActive = false;
+    cartelDefeated = true;
+    cartelPassiveIncome = 1_000_000;
+    alert("💥 Le Cartel Mexicain est vaincu ! Tes fils sont libres et tu gagnes 1 000 000 €/s.");
+    updateAttackUI(); updateUI(); saveGame();
+  } else {
+    alert("Pas assez de soldats pour vaincre le Cartel !");
+  }
+});
+
+// Revenus automatiques si Sevran est conquis
+setInterval(()=>{
+  if(sevranControlled){
+    money += 2000;
+    revenue += 2000;
+    updateUI();
+  }
+}, 1000);
+
+// Revenus automatiques si la France est conquise
+setInterval(()=> {
+  if(franceControlled){
+    const gain = 500000;
+    money += gain;
+    revenue += gain;
+    updateUI();
+    saveGame(false);
+  }
+}, 1000);
+
+
+// ======== JUSTICE FRANÇAISE ========
+function updateJusticeUI() {
+  const panel = document.getElementById('justicePanel');
+  const fill = document.getElementById('justiceFill');
+  const val = document.getElementById('justiceVal');
+  const info = document.getElementById('justiceInfo');
+  const btn = document.getElementById('corruptJudgeBtn');
+  if (!panel || !fill || !val || !btn) return;
+
+  // Si la France est contrôlée → justice désactivée
+  if (!justiceActive) {
+    fill.style.width = '0%';
+    fill.style.background = '#2b9348';
+    val.textContent = '0';
+    info.textContent = "🇫🇷 Tu contrôles la France, plus aucune perquisition possible.";
+    btn.style.display = 'none';
+    return;
+  }
+
+  // Mise à jour de la barre
+  fill.style.width = justiceSuspicion + '%';
+  val.textContent = Math.floor(justiceSuspicion);
+  let color = '#2b9348';
+  if (justiceSuspicion >= 70) color = '#ff7b00';
+  if (justiceSuspicion >= 90) color = '#c1121f';
+  fill.style.background = color;
+
+  // Texte d’état
+  info.textContent = justiceSuspicion < 100
+    ? `👀 La Justice te surveille... corruption possible.`
+    : `🚨 PERQUISITION !`;
+
+  // Corruption
+  btn.onclick = () => {
+    if (money >= corruptionCost && justiceActive) {
+      money -= corruptionCost;
+      justiceSuspicion = 0;
+      alert('💰 Le juge a été corrompu. Tes dossiers disparaissent mystérieusement.');
+      updateUI(); updateJusticeUI(); saveGame();
+    } else {
+      alert('💸 Pas assez d’argent pour corrompre la Justice.');
+    }
+  };
+}
+
+// ======== JUSTICE FRANÇAISE : progression automatique ========
+setInterval(() => {
+  if (!claimedRewards['justice']) return;
+  if (!justiceActive) return;
+
+  justiceSuspicion += justiceRate;
+  if (justiceSuspicion >= 100) {
+    justiceSuspicion = 100;
+    // 💥 Perquisition
+    alert('🧑‍⚖️ PERQUISITION ! Les keufs ont tout saisi, tu perds 90 % de ton argent 💸');
+    money = Math.floor(money * 0.1);
+    justiceSuspicion = 0;
+  }
+
+  updateJusticeUI();
+  saveGame(false);
+}, justiceTick);
+
+// ======== DETTES : UI ========
+function updateDebtsUI(){
+  const panel = document.getElementById('debtsPanel');
+  const div = document.getElementById('debtsContent');
+  if(!panel || !div) return;
+
+  if(!debtsUnlocked){
+    panel.style.display = 'none';
+    return;
+  } else {
+    panel.style.display = 'block';
+  }
+
+  const remaining = Math.max(0, debtsPerCycle - debtsPaid);
+  let html = `
+    <div>État : ${debtsActive ? '🔴 En cours' : '🟢 Aucune dette active'}</div>
+    <div>Cycle actuel : ${francMaconDealAccepted ? 'Suite après chantage' : 'Cycle initial'}</div>
+    <div>Dettes réglées : ${debtsPaid}/${debtsPerCycle}</div>
+    <div>Coût par dette : ${debtUnitCost.toLocaleString('fr-FR')} €</div>
+  `;
+
+  if(debtsActive && remaining > 0){
+    html += `
+      <div style="margin-top:8px;">Ponction automatique/minute : ${ (debtBaseDrain * remaining).toLocaleString('fr-FR') } €</div>
+      <button id="payOneDebtBtn" style="margin-top:8px;">Payer 1 dette (${debtUnitCost.toLocaleString('fr-FR')} €)</button>
+    `;
+  }
+
+  div.innerHTML = html;
+
+  document.getElementById('payOneDebtBtn')?.addEventListener('click', ()=>{
+    if(!debtsActive) return;
+    if(money >= debtUnitCost){
+      money -= debtUnitCost;
+      debtsPaid++;
+      if(debtsPaid >= debtsPerCycle){
+        // Fin de cycle → popup à choix
+        debtsActive = false;
+        handleFrancMaconChoice(); // lance le choix
+      }
+      updateUI(); updateDebtsUI(); saveGame();
+    } else {
+      alert("💸 Pas assez d’argent pour payer cette dette.");
+    }
+  });
+}
+// ======== DETTES : Popup de choix Franc-maçon ========
+function handleFrancMaconChoice(){
+  // Message conforme à ton scénario
+  const accepted = confirm(
+    "Pour être totalement quitte, les Francs-maçons veulent baiser ta femme (Kim K).\n\nACCEPTER ?\n\nOK = Accepter   |   Annuler = Refuser"
+  );
+
+  if(accepted){
+    francMaconDealAccepted = true;
+    alert("🎥 Ils ont filmé la scène… et te réclament de NOUVELLES dettes !");
+    // Nouveau cycle identique
+    debtsPaid = 0;
+    debtsActive = true;
+  } else {
+    francMaconVengeancePending = true;
+    alert("🔫 Tu as tiré sur un Franc-maçon. Ils menacent de se venger… à suivre.");
+    // Fin du système (l’histoire reprend son cours)
+    debtsActive = false;
+  }
+
+  updateDebtsUI();
+  saveGame();
+}
+// ======== DETTES : ponction automatique ========
+setInterval(()=>{
+  if(!debtsUnlocked || !debtsActive) return;
+
+  // On tourne à la seconde pour être précis, paiement à 60s
+  debtDrainTimer++;
+  if(debtDrainTimer >= 60){
+    debtDrainTimer = 0;
+    const remaining = Math.max(0, debtsPerCycle - debtsPaid);
+    if(remaining > 0){
+      const drain = debtBaseDrain * remaining; // 10M * (x5/x4/...)
+      const pay = Math.min(money, drain); // ne descend pas en négatif
+      if(pay > 0){
+        money -= pay;
+        // NB: ce drain ne compte pas comme "payer une dette" (il fait juste mal)
+      }
+      updateUI(); updateDebtsUI(); saveGame(false);
+    }
+  }
+}, 1000);
+
+// ======== CLUB DU PSG ========
+function updateClubUI(){
+  const panel = document.getElementById('clubPanel');
+  const div = document.getElementById('clubContent');
+  if(!panel || !div) return;
+
+  if(!clubUnlocked){
+    panel.style.display = 'none';
+    return;
+  } else {
+    panel.style.display = 'block';
+  }
+
+  let html = `
+    <div>🏟️ Pourcentage détenu : <strong>${clubPSGPercent}%</strong></div>
+    <div>💸 Revenu : ${(clubPSGPercent * clubPSGIncomePerPercent).toLocaleString('fr-FR')} €/s</div>
+  `;
+
+  if(clubPSGPercent < 100){
+    html += `<button id="buyClubPercentBtn">Acheter 1% (${clubPSGCostPerPercent.toLocaleString('fr-FR')} €)</button>`;
+  } else {
+    html += `<div style="margin-top:10px;">👑 Tu es désormais le président du PSG. Kim K danse sur la pelouse du Parc des Princes ! 💃</div>`;
+  }
+
+  div.innerHTML = html;
+
+  document.getElementById('buyClubPercentBtn')?.addEventListener('click', ()=> {
+    if(money >= clubPSGCostPerPercent){
+      money -= clubPSGCostPerPercent;
+      clubPSGPercent++;
+      if(clubPSGPercent >= 100){
+        clubPSGPercent = 100;
+        alert("👑 Tu es désormais le président du PSG ! Le Parc des Princes t’appartient !");
+      }
+      updateUI(); updateClubUI(); saveGame();
+    } else {
+      alert("💸 Pas assez d’argent !");
+    }
+  });
+}
+// ======== CLUB DU PSG : revenus automatiques ========
+setInterval(()=>{
+  if(!clubUnlocked || clubPSGPercent <= 0) return;
+  const gain = clubPSGPercent * clubPSGIncomePerPercent;
+  money += gain;
+  revenue += gain;
+  updateClubUI();
+  saveGame(false);
+}, 1000);
+
+// ======== CAMP D’ENTRAÎNEMENT ========
+function updateCampUI(){
+  const panel = document.getElementById('campPanel');
+  const div = document.getElementById('campContent');
+  if(!panel || !div) return;
+
+  if(!campUnlocked){
+    panel.style.display = 'none';
+    return;
+  } else {
+    panel.style.display = 'block';
+  }
+
+  let html = '';
+
+  if(!campOwned){
+    html = `
+      <p>🪖 Le camp n’est pas encore construit.</p>
+      <button id="buyCampBtn">Construire le camp (${campBuyCost.toLocaleString('fr-FR')} €)</button>
+    `;
+  } else {
+    const prod = campLevel ;
+    const upgradeCost = Math.floor(campUpgradeCostBase * (campLevel + 1));
+    html = `
+      <div>🏕️ Camp opérationnel</div>
+      <div>⚙️ Niveau : ${campLevel}</div>
+      <div>💪 Production : ${prod} soldats/sec</div>
+      <button id="upgradeCampBtn">Améliorer (${upgradeCost.toLocaleString('fr-FR')} €)</button>
+    `;
+  }
+
+  div.innerHTML = html;
+
+  // Achat
+  document.getElementById('buyCampBtn')?.addEventListener('click', ()=>{
+    if(money >= campBuyCost){
+      money -= campBuyCost;
+      campOwned = true;
+      alert("🏕️ Le camp est désormais opérationnel !");
+      updateUI(); updateCampUI(); saveGame();
+    } else {
+      alert("💸 Pas assez d’argent !");
+    }
+  });
+
+  // Amélioration
+  document.getElementById('upgradeCampBtn')?.addEventListener('click', ()=>{
+    const upgradeCost = Math.floor(campUpgradeCostBase * (campLevel + 1));
+    if(money >= upgradeCost){
+      money -= upgradeCost;
+      campLevel++;
+      alert(`📈 Camp amélioré au niveau ${campLevel} !`);
+      updateUI(); updateCampUI(); saveGame();
+    } else {
+      alert("💸 Pas assez d’argent !");
+    }
+  });
+}
+
+// ======== CAMP D’ENTRAÎNEMENT : production automatique ========
+setInterval(()=>{
+  if(!campUnlocked || !campOwned) return;
+  const gain = (campLevel + 1); // 1 de base + bonus par niveau
+  soldiers += gain;
+  updateUI();
+  updateCampUI();
+  saveGame(false);
+}, 1000);
+
+// ======== CAMP ANTI-MEXICAIN (coût d'upgrade fixe: 100 000 000 €) ========
+function updateCampMexicainUI(){
+  const panel = document.getElementById('campMexicainPanel');
+  const div = document.getElementById('campMexicainContent');
+  if(!panel || !div) return;
+
+  // Prix d'achat du camp : on conserve ta valeur actuelle (ex: 300 000 000 €)
+  const UPGRADE_COST = 100_000_000; // ✅ coût fixe, ne change jamais
+
+  if(!campMexicainOwned){
+    div.innerHTML = `
+      <button id="buyCampMexicainBtn">Acheter le Camp Anti-Mexicain (${campMexicainPrice.toLocaleString('fr-FR')} €)</button>
+    `;
+    document.getElementById('buyCampMexicainBtn')?.addEventListener('click', ()=>{
+      if(money >= campMexicainPrice){
+        money -= campMexicainPrice;
+        campMexicainOwned = true;
+        campMexicainLevel = 1;
+        alert("🏕️ Le Camp Anti-Mexicain est opérationnel. Tes soldats s’y entraînent contre les Cartels !");
+        updateUI(); updateCampMexicainUI(); saveGame();
+      } else {
+        alert("Pas assez d’argent !");
+      }
+    });
+    return;
+  }
+
+  // Panneau quand le camp est possédé
+  div.innerHTML = `
+    <div>Niveau du camp : <strong>${campMexicainLevel}</strong></div>
+    <div>Production : <strong>${(campMexicainBaseProd * campMexicainLevel).toLocaleString('fr-FR')}</strong> soldats/s</div>
+    <button id="upgradeCampMexicainBtn">Améliorer (+1 soldat/s) — <strong>${UPGRADE_COST.toLocaleString('fr-FR')} €</strong></button>
+  `;
+
+  document.getElementById('upgradeCampMexicainBtn')?.addEventListener('click', ()=>{
+    if(money >= UPGRADE_COST){
+      money -= UPGRADE_COST;       // ✅ on enlève un coût fixe
+      campMexicainLevel++;         // ✅ on augmente le niveau
+      alert("💪 Ton Camp Anti-Mexicain forme encore plus de soldats !");
+      updateUI(); updateCampMexicainUI(); saveGame();
+    } else {
+      alert("Pas assez d’argent !");
+    }
+  });
+}
+
+// ======== POPUP CHOIX : CARTEL MEXICAIN ========
+function handleCartelChoice(){
+  const choice = confirm(
+    "🇲🇽 Tes trois fils ont été enlevés par l’Union des Cartels Mexicains !\n\nACCEPTER leur libération (OK) ou REFUSER (Annuler) ?\n\n⚠️ Accepter : tu paies 99 % de ton argent et ils te prendront 50 % de tes revenus toutes les 15 s.\nRefuser : ils enferment tes fils, et chaque fois que tu atteins 500 M €, ils te volent 499 M €."
+  );
+
+  mexicanCartelActive = true;
+  cartelChoice = choice ? "accept" : "refuse";
+
+  if(choice){
+    // choix accepter
+    const loss = Math.floor(money * 0.99);
+    money -= loss;
+    alert("💸 Tu as payé la rançon... mais ils continuent de te ponctionner !");
+  } else {
+    alert("🚨 Tu as refusé. Tes fils sont emprisonnés... le Cartel te surveille désormais.");
+  }
+
+  updateUI();
+  saveGame();
+}
+// ======== CARTEL MEXICAIN : effets automatiques ========
+setInterval(() => {
+  if(!mexicanCartelActive || cartelDefeated) return;
+
+  // Cas "accepter" → perte de 50 % de l’argent toutes les 15 s
+  if(cartelChoice === "accept"){
+    cartelDrainTimer++;
+    if(cartelDrainTimer >= 15){
+      cartelDrainTimer = 0;
+      const loss = Math.floor(money * 0.5);
+      if(loss > 0){
+        money -= loss;
+        alert("💀 Le Cartel a prélevé 50 % de ton argent !");
+        updateUI(); saveGame(false);
+      }
+    }
+  }
+
+  // Cas "refuser" → dès qu’on atteint 500 M€, vol de 499 M€
+  if(cartelChoice === "refuse"){
+    if(money >= 500_000_000){
+      money -= 499_000_000;
+      alert("💰 Le Cartel a pillé ton compte de 499 M€ !");
+      updateUI(); saveGame(false);
+    }
+  }
+}, 1000);
+// ======== CAMP 2 ========
+function updateCamp2UI() {
+  const panel = document.getElementById('camp2Panel');
+  if (!panel) return;
+  const COST = 100_000_000;
+  let html = `
+    <h2>🏕️ Camp 2</h2>
+    <div>Niveau : <strong>${camp2Level}</strong></div>
+    <div>Production : <strong>${camp2Level * 20}</strong> soldats / 10s</div>
+    <button id="upgradeCamp2Btn">Améliorer (100 000 000 €)</button>
+  `;
+  panel.innerHTML = html;
+  document.getElementById('upgradeCamp2Btn')?.addEventListener('click', () => {
+    if (money >= COST) {
+      money -= COST;
+      camp2Level++;
+      alert("Camp 2 amélioré !");
+      updateCamp2UI();
+      saveGame();
+    } else alert("Pas assez d'argent !");
+  });
+}
+setInterval(() => {
+  if (camp2Unlocked) { soldiers += camp2Level * 20; updateUI(); saveGame(false); }
+}, 10000);
+
+// ======== CAMP 3 ========
+function updateCamp3UI() {
+  const panel = document.getElementById('camp3Panel');
+  if (!panel) return;
+  const COST = 100_000_000;
+  let html = `
+    <h2>🏕️ Camp 3</h2>
+    <div>Niveau : <strong>${camp3Level}</strong></div>
+    <div>Production : <strong>${camp3Level * 30}</strong> soldats / 10s</div>
+    <button id="upgradeCamp3Btn">Améliorer (100 000 000 €)</button>
+  `;
+  panel.innerHTML = html;
+  document.getElementById('upgradeCamp3Btn')?.addEventListener('click', () => {
+    if (money >= COST) {
+      money -= COST;
+      camp3Level++;
+      alert("Camp 3 amélioré !");
+      updateCamp3UI();
+      saveGame();
+    } else alert("Pas assez d'argent !");
+  });
+}
+setInterval(() => {
+  if (camp3Unlocked) { soldiers += camp3Level * 30; updateUI(); saveGame(false); }
+}, 10000);
+
+// ======== CAMP 4 ========
+function updateCamp4UI() {
+  const panel = document.getElementById('camp4Panel');
+  if (!panel) return;
+  const COST = 100_000_000;
+  let html = `
+    <h2>🏕️ Camp 4</h2>
+    <div>Niveau : <strong>${camp4Level}</strong></div>
+    <div>Production : <strong>${camp4Level * 40}</strong> soldats / 10s</div>
+    <button id="upgradeCamp4Btn">Améliorer (100 000 000 €)</button>
+  `;
+  panel.innerHTML = html;
+  document.getElementById('upgradeCamp4Btn')?.addEventListener('click', () => {
+    if (money >= COST) {
+      money -= COST;
+      camp4Level++;
+      alert("Camp 4 amélioré !");
+      updateCamp4UI();
+      saveGame();
+    } else alert("Pas assez d'argent !");
+  });
+}
+setInterval(() => {
+  if (camp4Unlocked) { soldiers += camp4Level * 40; updateUI(); saveGame(false); }
+}, 10000);
+
+// ======== CAMP 5 ========
+function updateCamp5UI() {
+  const panel = document.getElementById('camp5Panel');
+  if (!panel) return;
+  const COST = 100_000_000;
+  let html = `
+    <h2>🏕️ Camp 5</h2>
+    <div>Niveau : <strong>${camp5Level}</strong></div>
+    <div>Production : <strong>${camp5Level * 50}</strong> soldats / 10s</div>
+    <button id="upgradeCamp5Btn">Améliorer (100 000 000 €)</button>
+  `;
+  panel.innerHTML = html;
+  document.getElementById('upgradeCamp5Btn')?.addEventListener('click', () => {
+    if (money >= COST) {
+      money -= COST;
+      camp5Level++;
+      alert("Camp 5 amélioré !");
+      updateCamp5UI();
+      saveGame();
+    } else alert("Pas assez d'argent !");
+  });
+}
+setInterval(() => {
+  if (camp5Unlocked) { soldiers += camp5Level * 50; updateUI(); saveGame(false); }
+}, 10000);
+// === PANEL HTML ===
+const freemasonContainer = document.createElement('div');
+freemasonContainer.id = 'freemasonPanel';
+freemasonContainer.className = 'panel';
+freemasonContainer.style.display = 'none';
+freemasonContainer.innerHTML = `
+  <h2>🕍 Attaque finale</h2>
+  <div id="freemasonContent"></div>
+`;
+(document.querySelector('.panels') || document.body).appendChild(freemasonContainer);
+
+// === INTERFACE ET LOGIQUE ===
+function updateFreemasonUI() {
+  const div = document.getElementById('freemasonContent');
+  if (!div) return;
+
+  if (freemasonDefeated) {
+    div.innerHTML = `<div>🏁 Les Francs-Maçons ont été vaincus. Le monde est vide, il ne reste plus rien à débloquer...</div>`;
+    return;
+  }
+
+  div.innerHTML = `
+    <p>Les Francs-Maçons détiennent ta famille... Rassemble <strong>10 000 000</strong> soldats pour attaquer leur temple.</p>
+    <button id="attackFreemasonBtn">⚔️ Attaquer les Francs-Maçons (10 000 000 soldats)</button>
+  `;
+
+  document.getElementById('attackFreemasonBtn')?.addEventListener('click', () => {
+    if (soldiers < 10_000_000) {
+      alert("❌ Tu n’as pas assez de soldats pour attaquer !");
+      return;
+    }
+
+    soldiers -= 10_000_000;
+    updateUI();
+
+    // --- Scène finale ---
+    alert("💀 Les Francs-Maçons ont enlevé ta famille...");
+
+    // Récupération des prénoms existants
+    const enfants = ['Inoxtag', 'Nik l\'Urssaf', 'Zidane'];
+    const femme = 'Kim K';
+
+    const choix = prompt(
+`😈 Choisis qui sacrifier pour sauver les autres :
+1 - ${enfants[0]}
+2 - ${enfants[1]}
+3 - ${enfants[2]}
+4 - ${femme}`
+    );
+
+    let victime = 'un membre de ta famille';
+    if (choix === '1') victime = enfants[0];
+    else if (choix === '2') victime = enfants[1];
+    else if (choix === '3') victime = enfants[2];
+    else if (choix === '4') victime = femme;
+
+    alert(`💔 Tu as choisi : ${victime}\n🏁 FIN DU JEU\n\nLes Francs-Maçons ont été vaincus... mais à quel prix ?`);
+
+    freemasonDefeated = true;
+    updateFreemasonUI();
+    saveGame();
+  });
+}
+
+
+    // Load + init
+loadGame();
+
+// ✅ Sécurité : restaurer uniquement les panneaux réellement débloqués
+const panelsToRestore = [
+  { id: 'crypto', element: 'cryptoPanel', update: updateCryptoUI },
+  { id: 'bibitrade', element: 'bibitradePanel', update: updateBibitradeUI },
+  { id: 'family', element: 'familyPanel', update: updateFamilyUI },
+  { id: 'airport', element: 'airportPanel', update: updateAirportUI },
+  { id: 'health', element: 'healthPanel', update: updateHealthUI },  
+  { id: 'army', element: 'armyPanel', update: updateArmyUI },
+  { id: 'attack', element: 'attackPanel', update: updateAttackUI },
+  { id: 'justice', element: 'justicePanel', update: updateJusticeUI },
+  { id: 'debts', element: 'debtsPanel', update: updateDebtsUI },
+  { id: 'club', element: 'clubPanel', update: updateClubUI },
+  { id: 'camp', element: 'campPanel', update: updateCampUI },
+  { id: 'campMexicain', element: 'campMexicainPanel', update: updateCampMexicainUI },
+
+];
+
+for (const p of panelsToRestore) {
+  if (claimedRewards[p.id]) { // ✅ Seulement si déjà débloqué
+    const el = document.getElementById(p.element);
+    if (el) el.style.display = 'block';
+    if (typeof p.update === 'function') p.update();
+  }
+}
+
+if (airportOwned) {
+  const ap = document.getElementById('airportPanel');
+  if (ap) ap.style.display = 'block';
+  updateAirportUI();
+}
+
+saveGame(false);
+
+updateUI();
+updateCommercesUI();
+updateDrugsUI();
+updateBibitradeUI();
+updateHealthUI();
+updateArmyUI();
+updateAttackUI();
+updateDebtsUI();
+updateClubUI();
+updateCampUI();
+updateCampMexicainUI();
+updateCamp2UI();
+updateCamp3UI();
+updateCamp4UI();
+updateCamp5UI();
+updateFreemasonUI();
+
+
+
+  </script>
+</body>
+</html>
