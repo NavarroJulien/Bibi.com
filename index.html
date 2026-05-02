@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bibi Client</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f2ee;
+    --surface: #faf9f7;
+    --surface2: #ede9e3;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.18);
+    --text-primary: #1a1816;
+    --text-secondary: #7a7060;
+    --text-muted: #b0a898;
+    --accent: #8b6f47;
+    --accent-dim: rgba(139,111,71,0.1);
+    --accent-glow: rgba(139,111,71,0.06);
+    --red: #c0392b;
+    --green: #2d7a4f;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    overflow: hidden;
+  }
+
+  /* ── NOISE GRAIN ─────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    background-size: 180px;
+  }
+
+  /* ── AMBIENT LIGHT ───────────────────────────────── */
+  .ambient {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(139,111,71,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 10% 90%, rgba(180,160,120,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 90% 90%, rgba(180,160,120,0.05) 0%, transparent 60%);
+  }
+
+  /* ── LAYOUT ──────────────────────────────────────── */
+  .shell {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    width: 100%; height: 100vh;
+  }
+
+  /* ── TITLEBAR ────────────────────────────────────── */
+  .titlebar {
+    display: flex; align-items: center;
+    padding: 0 24px;
+    height: 48px;
+    background: rgba(244,242,238,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-app-region: drag;
+  }
+
+  .titlebar-dots {
+    display: flex; gap: 8px; margin-right: 20px;
+    -webkit-app-region: no-drag;
+  }
+  .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .dot:hover { opacity: 0.8; }
+  .dot.close { background: #ff5f57; }
+  .dot.minimize { background: #ffbd2e; }
+  .dot.maximize { background: #28ca41; }
+
+  .titlebar-logo {
+    flex: 1; display: flex; justify-content: center;
+  }
+
+  .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--accent);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .logo-icon::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+  .logo-text span {
+    color: var(--accent);
+  }
+  .app-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(74,56,32,0.12));
+  }
+
+  .game-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25,0,0,1);
+  }
+
+  .titlebar-status {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── NAV ─────────────────────────────────────────── */
+  .nav {
+    display: flex; align-items: center; gap: 2px;
+    padding: 0 32px;
+    height: 44px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .nav-item {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+  .nav-item.active {
+    color: var(--accent);
+    position: relative;
+  }
+  .nav-item.active::after {
+    content: '';
+    position: absolute; bottom: -12px; left: 14px; right: 14px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* ── MAIN CONTENT ────────────────────────────────── */
+  .main {
+    flex: 1; overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 48px 56px 40px;
+    gap: 40px;
+  }
+
+  /* ── HEADER ──────────────────────────────────────── */
+  .header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+
+  .header-title {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .header-meta {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+  .header-meta strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+
+  /* ── GAME GRID ───────────────────────────────────── */
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    flex: 1;
+    align-items: stretch;
+  }
+
+  .game-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(250,249,247,0.98), rgba(244,242,238,0.94));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column;
+    box-shadow: 0 14px 34px rgba(74,56,32,0.06);
+  }
+  .game-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 42px rgba(74,56,32,0.11);
+  }
+  .game-card:hover .card-overlay { opacity: 1; }
+  .game-card:hover .card-launch-btn { opacity: 1; transform: translateY(0); }
+  .game-card:hover .card-poster, .game-card:hover .game-image { transform: scale(1.03); }
+
+  .card-poster-wrap {
+    position: relative;
+    min-height: 280px;
+    padding: 24px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.18) 36%, transparent 62%),
+      linear-gradient(135deg, #e8e2d8 0%, #f6f3ee 46%, #d8cbb8 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .game-card:nth-child(2) .card-poster-wrap {
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255,240,205,0.42) 0%, rgba(80,50,22,0.12) 42%, transparent 68%),
+      linear-gradient(135deg, #24170d 0%, #5b3a1c 48%, #b28a4c 100%);
+  }
+  .card-poster {
+    width: min(100%, 330px);
+    aspect-ratio: 1 / 1;
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(250,249,247,0.58);
+    border: 1px solid rgba(255,255,255,0.38);
+    box-shadow:
+      0 18px 42px rgba(45,31,18,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.55);
+    transition: transform 0.5s cubic-bezier(0.25,0,0,1), box-shadow 0.5s cubic-bezier(0.25,0,0,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Placeholder art when no image */
+  .placeholder-art {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card:nth-child(1) .placeholder-art {
+    background: linear-gradient(135deg, #e8e2d8 0%, #d4cec4 50%, #e8e2d8 100%);
+  }
+  .game-card:nth-child(2) .placeholder-art {
+    background: linear-gradient(135deg, #dfe8e0 0%, #ccd8ce 50%, #dfe8e0 100%);
+  }
+
+  .pa-lines {
+    position: absolute; inset: 0;
+    opacity: 0.18;
+  }
+  .pa-lines line { stroke: var(--accent); stroke-width: 0.5; }
+
+  .pa-glyph {
+    font-family: var(--font-display);
+    font-size: 80px;
+    font-weight: 300;
+    opacity: 0.18;
+    color: #4a3820;
+    letter-spacing: -0.05em;
+    z-index: 1;
+  }
+  .pa-badge {
+    position: absolute; bottom: 16px; left: 16px;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent);
+    z-index: 2;
+  }
+
+  .card-overlay {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 50% 45%, transparent 0%, rgba(26,24,22,0.04) 62%, rgba(26,24,22,0.12) 100%),
+      linear-gradient(to top, rgba(244,242,238,0.38) 0%, transparent 58%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .card-launch-btn {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, calc(-50% + 8px));
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    background: rgba(250,249,247,0.9);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 28px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    cursor: pointer;
+    pointer-events: none;
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+  }
+
+  .card-body {
+    padding: 22px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    flex: 1;
+  }
+
+  .card-title-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px;
+  }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 500;
+    letter-spacing: 0.015em;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+  .card-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+    margin-top: 3px;
+  }
+  .badge-available {
+    background: rgba(45,122,79,0.1);
+    color: #1e6b3e;
+    border: 1px solid rgba(45,122,79,0.25);
+  }
+  .badge-new {
+    background: rgba(139,111,71,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(139,111,71,0.22);
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    min-height: 40px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-meta {
+    display: flex; gap: 16px;
+  }
+  .meta-item {
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .meta-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .meta-value {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .card-action {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+  }
+  .card-action:hover { color: var(--accent); }
+  .card-action svg { transition: transform 0.2s; }
+  .card-action:hover svg { transform: translateX(3px); }
+
+
+  .card-poster-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 18px;
+    border: 1px solid rgba(139,111,71,0.12);
+    border-radius: 22px;
+    pointer-events: none;
+  }
+
+  .card-poster-wrap::after {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(139,111,71,0.12);
+    filter: blur(42px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .game-card:nth-child(2) .card-poster-wrap::before {
+    border-color: rgba(255,225,160,0.16);
+  }
+
+  .game-card:nth-child(2) .card-poster-wrap::after {
+    background: rgba(255,196,92,0.22);
+  }
+
+  .game-card:hover .card-poster {
+    box-shadow:
+      0 22px 52px rgba(45,31,18,0.24),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+
+  @media (max-width: 900px) {
+    html, body { overflow: auto; }
+
+    .main {
+      overflow: visible;
+      padding: 36px 24px 32px;
+      gap: 28px;
+    }
+
+    .header {
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .game-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .card-poster-wrap {
+      min-height: 300px;
+    }
+
+    .card-poster {
+      width: min(100%, 300px);
+    }
+
+    .statusbar {
+      padding: 0 24px;
+    }
+  }
+
+  @media (max-height: 760px) and (min-width: 901px) {
+    .main {
+      padding-top: 32px;
+      gap: 28px;
+    }
+
+    .card-poster-wrap {
+      min-height: 240px;
+      padding: 18px;
+    }
+
+    .card-poster {
+      width: min(100%, 260px);
+    }
+
+    .card-body {
+      padding: 18px 22px 20px;
+    }
+  }
+
+
+  /* ── STATUSBAR ───────────────────────────────────── */
+  .statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 56px;
+    height: 32px;
+    border-top: 1px solid var(--border);
+    background: rgba(237,233,227,0.8);
+    flex-shrink: 0;
+  }
+  .sb-left, .sb-right {
+    display: flex; align-items: center; gap: 20px;
+    font-size: 10px; color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .sb-accent { color: var(--text-secondary); }
+
+  /* ── FADE IN ─────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .main { animation: fadeUp 0.5s ease both; }
+  .game-card:nth-child(1) { animation: fadeUp 0.5s 0.1s ease both; }
+  .game-card:nth-child(2) { animation: fadeUp 0.5s 0.2s ease both; }
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<div class="shell">
+
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="titlebar-dots">
+      <div class="dot close"></div>
+      <div class="dot minimize"></div>
+      <div class="dot maximize"></div>
+    </div>
+
+    <div class="titlebar-logo">
+      <div class="logo-mark">
+        <img class="app-logo" src="jeux/picap/bibi_logo.png" alt="Logo Bibi Client" draggable="false">
+        <span class="logo-text">Bibi <span>Client</span></span>
+      </div>
+    </div>
+
+    <div class="titlebar-status">
+      <div class="status-dot"></div>
+      <span>En ligne</span>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-item active">Bibliothèque</div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="header">
+      <div class="header-title">
+        <span class="eyebrow">Bibi Client — v1.0</span>
+        <h1 class="page-title">Bibliothèque</h1>
+      </div>
+      <div class="header-meta">
+        <strong>2 jeux</strong>
+        Dernière connexion aujourd'hui
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="game-grid">
+
+      <!-- GAME 1 -->
+      <div class="game-card" onclick="launchGame('jeux/bibicom.html')">
+        <div class="card-poster-wrap">
+          <div class="card-poster">
+            <img class="game-image" src="jeux/picap/logo_bibi.png" alt="Logo BIBI.COM" loading="eager" draggable="false">
+          </div>
+          <div class="card-overlay"></div>
+          <div class="card-launch-btn">Lancer</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">BIBI.COM</h2>
+            <span class="card-badge badge-available">Disponible</span>
+          </div>
+          <p class="card-desc">Bibi.com : deviens un plus grand criminel que Deb Chartier</p>
+          <div class="card-footer">
+            <div class="card-meta">
+              <div class="meta-item">
+                <span class="meta-label">Genre</span>
+                <span class="meta-value">—</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Version</span>
+                <span class="meta-value">—</span>
+              </div>
+            </div>
+            <a class="card-action" href="#">
+              Jouer
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- GAME 2 -->
+      <div class="game-card" onclick="launchGame('jeux/bibitcg.html')">
+        <div class="card-poster-wrap">
+          <div class="card-poster">
+            <img class="game-image" src="jeux/picap/logo_tcg.png" alt="Logo BIBI TCG" loading="eager" draggable="false">
+          </div>
+          <div class="card-overlay"></div>
+          <div class="card-launch-btn">Lancer</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">BIBI TCG</h2>
+            <span class="card-badge badge-new">Nouveau</span>
+          </div>
+          <p class="card-desc">Bibi TCG.</p>
+          <div class="card-footer">
+            <div class="card-meta">
+              <div class="meta-item">
+                <span class="meta-label">Genre</span>
+                <span class="meta-value">—</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Version</span>
+                <span class="meta-value">—</span>
+              </div>
+            </div>
+            <a class="card-action" href="#">
+              Jouer
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- STATUSBAR -->
+  <div class="statusbar">
+    <div class="sb-left">
+      <div class="sb-item"><span>Bibi Client</span><span class="sb-accent">v1.0.0</span></div>
+      <div class="sb-item"><span>2 jeux installés</span></div>
+    </div>
+    <div class="sb-right">
+      <div class="sb-item"><span class="sb-accent" id="clock"></span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function launchGame(url) {
+    window.location.href = url;
+  }
+
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = h + ':' + m;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+
+  // Card action links → prevent card click
+  document.querySelectorAll('.card-action').forEach(a => {
+    a.addEventListener('click', e => {
+      e.stopPropagation();
+      const card = a.closest('.game-card');
+      const idx = [...card.parentNode.children].indexOf(card);
+      launchGame(idx === 0 ? 'bibicom.html' : 'bibitcg.html');
+    });
+  });
+</script>
+
+</body>
+</html>
