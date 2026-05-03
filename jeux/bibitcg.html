@@ -1799,6 +1799,44 @@
       .top-resource-pill { font-size: .53rem !important; }
     }
 
+
+    /* ─── PATCH IPHONE RENFORCÉ — ajout demandé ───────────── */
+    @media (max-width: 430px) {
+      .app { padding-inline: 8px !important; }
+      .panel { border-radius: 20px !important; box-shadow: 0 14px 34px rgba(0,0,0,.36) !important; }
+      .arena, .battle-content { padding: 8px !important; }
+      .nav-bar { top: calc(50px + env(safe-area-inset-top)) !important; padding: 8px !important; }
+      .nav-buttons .btn { min-height: 40px !important; padding: 8px 10px !important; font-size: .58rem !important; }
+      .home-action-title, .section-title { font-size: .7rem !important; letter-spacing: .075em !important; }
+      .team-summary-row { display: grid !important; grid-template-columns: 1fr !important; gap: 6px !important; }
+      .team-summary-pill, .top-resource-pill { min-width: 0 !important; }
+      .dash-grid { grid-template-columns: 1fr 1fr !important; }
+      .stat-card { min-height: 86px !important; }
+      .cards-grid, .boss-list, .collection-sets-grid, .shop-pack-grid, .enemy-team-grid { grid-template-columns: 1fr 1fr !important; }
+      .shop-pack-card, .collection-set-card, .boss-mini-card { border-radius: 18px !important; }
+      .shop-pack-cover { height: 128px !important; border-radius: 16px !important; }
+      .shop-pack-body { padding: 12px !important; }
+      .combat-card-list, .team-stock-grid { grid-template-columns: 1fr 1fr !important; }
+      .combat-card-btn, .team-stock-card { min-height: 168px !important; }
+      .modal-inner { max-height: calc(var(--iphone-vh, 100dvh) - 24px) !important; }
+      #mazeGameCanvas { width: 100% !important; max-height: min(78vw, calc(var(--iphone-vh, 100dvh) - 260px)) !important; touch-action: none !important; }
+      .maze-panel { padding: 12px !important; border-radius: 20px !important; }
+      .maze-hud { display: grid !important; grid-template-columns: 1fr !important; }
+      .maze-pill { width: 100% !important; text-align: center !important; }
+      .battle-scene, .fishing-scene, .bar-scene { min-height: auto !important; }
+      .toast-stack { bottom: calc(8px + env(safe-area-inset-bottom)) !important; }
+    }
+
+    @media (max-width: 360px) {
+      .logo-title { font-size: clamp(1.85rem, 13vw, 2.65rem) !important; }
+      .cards-grid, .boss-list, .collection-sets-grid, .combat-card-list, .team-stock-grid { gap: 7px !important; }
+      .card-content-inner { padding: 7px !important; }
+      .card-name { font-size: .58rem !important; }
+      .card-power { font-size: .64rem !important; padding: 3px 7px !important; }
+      .stat-value { font-size: 1.35rem !important; }
+      .btn, .btn-sm { letter-spacing: .035em !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -2966,7 +3004,7 @@ function renderLabyrinth(){
     content.innerHTML=`
       <div class="hero-section">
         <h2 class="hero-title">Labyrinthe en recharge</h2>
-        <div class="maze-info">Le mode Labyrinthe est jouable une fois par minute. Tu pourras relancer une partie dans <strong>${formatTimer(remaining)}</strong>.</div>
+        <div class="maze-info">Le mode Labyrinthe est jouable une fois toutes les 3 minutes. Tu pourras relancer une partie dans <strong>${formatTimer(remaining)}</strong>.</div>
       </div>
       <div class="maze-panel">
         <div class="section-title">Mini-jeu indisponible</div>
@@ -3048,7 +3086,7 @@ function renderLabyrinth(){
     state.lastLabyrinthAt = Date.now();
     saveState();
     restartButton.disabled = true;
-    restartButton.textContent = "Recommencer dans 1:00";
+    restartButton.textContent = "Recommencer dans 3:00";
     setTimeout(()=>{ if(restartButton){ restartButton.disabled=false; restartButton.textContent="Recommencer"; } }, LABYRINTH_COOLDOWN_MS);
     stopTimers();
     maze = [];
@@ -3368,16 +3406,25 @@ function renderLabyrinth(){
     else movePlayer(0, Math.sign(dy));
   }
   function handleMouseMove(event){ moveTowardCell(canvasCellFromPointer(event)); }
+  function handleTouchMove(event){
+    event.preventDefault();
+    const touch = event.touches?.[0] || event.changedTouches?.[0];
+    if(touch) moveTowardCell(canvasCellFromPointer(touch));
+  }
 
   canvas.style.cursor = "crosshair";
   canvas.addEventListener("mousemove", handleMouseMove);
   canvas.addEventListener("click", handleMouseMove);
+  canvas.addEventListener("touchstart", handleTouchMove, { passive:false });
+  canvas.addEventListener("touchmove", handleTouchMove, { passive:false });
   document.addEventListener("keydown", handleKeydown);
   restartButton.addEventListener("click", initMaze);
   currentMazeCleanup = () => {
     stopTimers();
     canvas.removeEventListener("mousemove", handleMouseMove);
     canvas.removeEventListener("click", handleMouseMove);
+    canvas.removeEventListener("touchstart", handleTouchMove);
+    canvas.removeEventListener("touchmove", handleTouchMove);
     document.removeEventListener("keydown", handleKeydown);
   };
   initMaze();
@@ -4107,7 +4154,7 @@ function toast(message){
 const SPECIAL_PACK_DEFAULT_PRICE = 8;
 const BOSS_250_PACK_ID = "exclusive-boss-250";
 const BOSS_RUSH_COOLDOWN_MS = 300000;
-const LABYRINTH_COOLDOWN_MS = 60000;
+const LABYRINTH_COOLDOWN_MS = 180000;
 function labyrinthRemaining(){ return Math.max(0, LABYRINTH_COOLDOWN_MS - (Date.now()-Number(state.lastLabyrinthAt||0))); }
 const COURSE_POTION_MS = 300000;
 const COURSE_SKIBIDIFLUX_MS = 600000;
@@ -4124,7 +4171,7 @@ function ensureNewProgressFields(){
   }
   state.cardScore = Number(state.cardScore||0);
   if(typeof state.lastSkibidifluxLevelReward !== "number"){
-    state.lastSkibidifluxLevelReward = Math.floor(state.cardScore/200)+1;
+    state.lastSkibidifluxLevelReward = Math.floor(state.cardScore/50)+1;
   } else {
     state.lastSkibidifluxLevelReward = Number(state.lastSkibidifluxLevelReward||1);
   }
@@ -4132,8 +4179,8 @@ function ensureNewProgressFields(){
 ensureNewProgressFields();
 
 function progressScore(){ ensureNewProgressFields(); return Number(state.cardScore||0); }
-function playerLevel(){ return Math.floor(progressScore()/200)+1; }
-function nextLevelScore(){ return playerLevel()*200; }
+function playerLevel(){ return Math.floor(progressScore()/50)+1; }
+function nextLevelScore(){ return playerLevel()*50; }
 function scoreToNextLevel(){ return Math.max(0,nextLevelScore()-progressScore()); }
 function checkLevelSkibidifluxReward(){
   ensureNewProgressFields();
@@ -4237,7 +4284,7 @@ renderHome = function(){
   viewTitle.textContent="Tableau de bord"; viewHint.textContent=""; ensureNewProgressFields();
   const owned=getOwnedList(); const defeated=state.defeatedBosses.length; const unlocked=visibleBonusUnlocks(); const locked=lockedBonusUnlocks();
   const unlockedButtons = unlocked.map(u=>`<button class="btn btn-secondary" onclick="setView('${u.view}')">${u.icon} ${u.name}</button>`).join("");
-  content.innerHTML = `<div class="hero-section"><h2 class="hero-title">Menu principal</h2><div class="home-action-groups"><div class="home-action-group"><div class="home-action-title">Disponible dès le lancement</div><div class="home-action-buttons"><button class="btn btn-primary" onclick="setView('shop')">🛒 Boutique packs</button><button class="btn btn-primary" onclick="setView('bosses')">⚔ Boss</button><button class="btn btn-secondary" onclick="setView('upgrade')">⬆ Améliorations</button><button class="btn btn-secondary" onclick="setView('collection')">📚 Collection</button><button class="btn btn-secondary" id="devCodeBtn">🛠 Code développeur</button></div></div><div class="home-action-group"><div class="home-action-title">Sections bonus débloquées</div><div class="home-action-buttons">${unlockedButtons || `<span class="team-summary-pill">Aucune section bonus débloquée pour l'instant.</span>`}</div></div><div class="home-action-group"><div class="home-action-title">Progression</div><div class="team-summary-row"><span class="team-summary-pill">Niveau : <strong>${playerLevel()}</strong></span><span class="team-summary-pill">Score : <strong>${progressScore()}</strong></span><span class="team-summary-pill">Prochain niveau : <strong>${scoreToNextLevel()}</strong></span></div></div></div></div><div class="dash-grid"><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--cyan),transparent)"><span class="stat-label">Cartes uniques</span><strong class="stat-value">${owned.length}</strong><span class="stat-sub">/${CATALOG.length} total</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--gold),transparent)"><span class="stat-label">Score progression</span><strong class="stat-value">${progressScore()}</strong><span class="stat-sub">+1 niveau tous les 200</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--green),transparent)"><span class="stat-label">Niveau</span><strong class="stat-value">${playerLevel()}</strong><span class="stat-sub">${scoreToNextLevel()} score avant niveau ${playerLevel()+1}</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--gold),transparent)"><span class="stat-label">SKIBIDIFLUX</span><strong class="stat-value">${Number(state.popopipipapa||0)}</strong><span class="stat-sub">monnaie packs</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--purple),transparent)"><span class="stat-label">Potions</span><strong class="stat-value">${Number(state.potions||0)}</strong><span class="stat-sub">revive instantané</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--red),transparent)"><span class="stat-label">Boss vaincus</span><strong class="stat-value">${defeated}</strong><span class="stat-sub">/${ALL_BOSSES.length} boss</span></div></div><div class="section-title" style="margin-top:22px">Récompenses de niveau à venir</div><div class="unlock-grid">${locked.map(u=>`<div class="unlock-card locked"><div class="unlock-card-title">Niv. ${u.level} · ${u.icon} ${u.name}</div><div class="unlock-card-meta">${u.desc}</div></div>`).join("") || `<div class="unlock-card"><div class="unlock-card-title">Tout est débloqué ✅</div><div class="unlock-card-meta">Tu as accès à toutes les sections bonus.</div></div>`}</div>`;
+  content.innerHTML = `<div class="hero-section"><h2 class="hero-title">Menu principal</h2><div class="home-action-groups"><div class="home-action-group"><div class="home-action-title">Disponible dès le lancement</div><div class="home-action-buttons"><button class="btn btn-primary" onclick="setView('shop')">🛒 Boutique packs</button><button class="btn btn-primary" onclick="setView('bosses')">⚔ Boss</button><button class="btn btn-secondary" onclick="setView('upgrade')">⬆ Améliorations</button><button class="btn btn-secondary" onclick="setView('collection')">📚 Collection</button><button class="btn btn-secondary" id="devCodeBtn">🛠 Code développeur</button></div></div><div class="home-action-group"><div class="home-action-title">Sections bonus débloquées</div><div class="home-action-buttons">${unlockedButtons || `<span class="team-summary-pill">Aucune section bonus débloquée pour l'instant.</span>`}</div></div><div class="home-action-group"><div class="home-action-title">Progression</div><div class="team-summary-row"><span class="team-summary-pill">Niveau : <strong>${playerLevel()}</strong></span><span class="team-summary-pill">Score : <strong>${progressScore()}</strong></span><span class="team-summary-pill">Prochain niveau : <strong>${scoreToNextLevel()}</strong></span></div></div></div></div><div class="dash-grid"><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--cyan),transparent)"><span class="stat-label">Cartes uniques</span><strong class="stat-value">${owned.length}</strong><span class="stat-sub">/${CATALOG.length} total</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--gold),transparent)"><span class="stat-label">Score progression</span><strong class="stat-value">${progressScore()}</strong><span class="stat-sub">+1 niveau tous les 50</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--green),transparent)"><span class="stat-label">Niveau</span><strong class="stat-value">${playerLevel()}</strong><span class="stat-sub">${scoreToNextLevel()} score avant niveau ${playerLevel()+1}</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--gold),transparent)"><span class="stat-label">SKIBIDIFLUX</span><strong class="stat-value">${Number(state.popopipipapa||0)}</strong><span class="stat-sub">monnaie packs</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--purple),transparent)"><span class="stat-label">Potions</span><strong class="stat-value">${Number(state.potions||0)}</strong><span class="stat-sub">revive instantané</span></div><div class="stat-card" style="--stat-accent:linear-gradient(90deg,var(--red),transparent)"><span class="stat-label">Boss vaincus</span><strong class="stat-value">${defeated}</strong><span class="stat-sub">/${ALL_BOSSES.length} boss</span></div></div><div class="section-title" style="margin-top:22px">Récompenses de niveau à venir</div><div class="unlock-grid">${locked.map(u=>`<div class="unlock-card locked"><div class="unlock-card-title">Niv. ${u.level} · ${u.icon} ${u.name}</div><div class="unlock-card-meta">${u.desc}</div></div>`).join("") || `<div class="unlock-card"><div class="unlock-card-title">Tout est débloqué ✅</div><div class="unlock-card-meta">Tu as accès à toutes les sections bonus.</div></div>`}</div>`;
   document.getElementById("devCodeBtn")?.addEventListener("click", openDeveloperCode); updateNavLocks();
 };
 
@@ -4763,7 +4810,7 @@ openDeveloperCode = function(){ const pwd=prompt("Code développeur"); if(pwd!==
     viewHint.textContent="Atteins la sortie avant la fin du temps. Victoire = amélioration d'une carte.";
     const remaining = labyrinthRemaining();
     if(remaining > 0){
-      content.innerHTML=`<div class="hero-section"><h2 class="hero-title">Labyrinthe en recharge</h2><div class="maze-info">Le mode Labyrinthe est jouable une fois par minute. Tu pourras relancer une partie dans <strong>${formatTimer(remaining)}</strong>.</div></div><div class="maze-panel"><div class="section-title">Mini-jeu indisponible</div><div class="maze-hud"><div class="maze-pill">⏳ Cooldown : <span id="labyrinthCooldownLeft">${formatTimer(remaining)}</span></div><div class="maze-pill">✨ Récompense : +1 note sur une carte</div></div><button class="btn btn-secondary" onclick="setView('home')">Retour accueil</button></div>`;
+      content.innerHTML=`<div class="hero-section"><h2 class="hero-title">Labyrinthe en recharge</h2><div class="maze-info">Le mode Labyrinthe est jouable une fois toutes les 3 minutes. Tu pourras relancer une partie dans <strong>${formatTimer(remaining)}</strong>.</div></div><div class="maze-panel"><div class="section-title">Mini-jeu indisponible</div><div class="maze-hud"><div class="maze-pill">⏳ Cooldown : <span id="labyrinthCooldownLeft">${formatTimer(remaining)}</span></div><div class="maze-pill">✨ Récompense : +1 note sur une carte</div></div><button class="btn btn-secondary" onclick="setView('home')">Retour accueil</button></div>`;
       const cooldownTimer=setInterval(()=>{ const left=labyrinthRemaining(); const el=document.getElementById('labyrinthCooldownLeft'); if(el) el.textContent=formatTimer(left); if(left<=0){ clearInterval(cooldownTimer); if(currentView==='labyrinth') renderLabyrinth(); } },1000);
       currentMazeCleanup=()=>clearInterval(cooldownTimer);
       return;
@@ -4773,7 +4820,7 @@ openDeveloperCode = function(){ const pwd=prompt("Code développeur"); if(pwd!==
     const cols=15, rows=15, tileSize=canvas.width/cols, visionRadius=2.8, wallChangeInterval=4500, gameDuration=90;
     let maze=[], player={x:0,y:0}, exit={x:cols-1,y:rows-1}, gameOver=false, wallTimer=null, countdownTimer=null, animationFrame=null, lastWallChangeTime=Date.now(), timeLeft=gameDuration;
     function createCell(x,y){return{x,y,visited:false,walls:{top:true,right:true,bottom:true,left:true}};}
-    function initMaze(){ const rem=labyrinthRemaining(); if(rem>0){ stopTimers(); message.textContent=`Labyrinthe disponible dans ${formatTimer(rem)}.`; message.style.color="var(--gold)"; restartButton.disabled=true; restartButton.textContent=`Disponible dans ${formatTimer(rem)}`; const retryTimer=setInterval(()=>{ const left=labyrinthRemaining(); restartButton.textContent=left>0?`Disponible dans ${formatTimer(left)}`:"Recommencer"; restartButton.disabled=left>0; if(left<=0) clearInterval(retryTimer); },1000); return; } state.lastLabyrinthAt=Date.now(); saveState(); restartButton.disabled=true; restartButton.textContent="Recommencer dans 1:00"; setTimeout(()=>{ if(restartButton){ restartButton.disabled=false; restartButton.textContent="Recommencer"; } }, LABYRINTH_COOLDOWN_MS); stopTimers(); maze=[]; for(let y=0;y<rows;y++){ const row=[]; for(let x=0;x<cols;x++) row.push(createCell(x,y)); maze.push(row); } generateMaze(); player={x:0,y:0}; exit=findFarthestCellFromStart(); gameOver=false; timeLeft=gameDuration; timeLeftEl.textContent=timeLeft; message.textContent=""; message.style.color="var(--white)"; lastWallChangeTime=Date.now(); wallTimer=setInterval(changeRandomWallsSafely,wallChangeInterval); countdownTimer=setInterval(updateCountdown,1000); draw(); }
+    function initMaze(){ const rem=labyrinthRemaining(); if(rem>0){ stopTimers(); message.textContent=`Labyrinthe disponible dans ${formatTimer(rem)}.`; message.style.color="var(--gold)"; restartButton.disabled=true; restartButton.textContent=`Disponible dans ${formatTimer(rem)}`; const retryTimer=setInterval(()=>{ const left=labyrinthRemaining(); restartButton.textContent=left>0?`Disponible dans ${formatTimer(left)}`:"Recommencer"; restartButton.disabled=left>0; if(left<=0) clearInterval(retryTimer); },1000); return; } state.lastLabyrinthAt=Date.now(); saveState(); restartButton.disabled=true; restartButton.textContent="Recommencer dans 3:00"; setTimeout(()=>{ if(restartButton){ restartButton.disabled=false; restartButton.textContent="Recommencer"; } }, LABYRINTH_COOLDOWN_MS); stopTimers(); maze=[]; for(let y=0;y<rows;y++){ const row=[]; for(let x=0;x<cols;x++) row.push(createCell(x,y)); maze.push(row); } generateMaze(); player={x:0,y:0}; exit=findFarthestCellFromStart(); gameOver=false; timeLeft=gameDuration; timeLeftEl.textContent=timeLeft; message.textContent=""; message.style.color="var(--white)"; lastWallChangeTime=Date.now(); wallTimer=setInterval(changeRandomWallsSafely,wallChangeInterval); countdownTimer=setInterval(updateCountdown,1000); draw(); }
     function stopTimers(){ if(wallTimer) clearInterval(wallTimer); if(countdownTimer) clearInterval(countdownTimer); if(animationFrame) cancelAnimationFrame(animationFrame); wallTimer=null; countdownTimer=null; animationFrame=null; }
     function generateMaze(){ const stack=[], start=maze[0][0]; start.visited=true; stack.push(start); while(stack.length){ const current=stack[stack.length-1], neighbors=getUnvisitedNeighbors(current); if(neighbors.length){ const next=neighbors[Math.floor(Math.random()*neighbors.length)]; removeWallBetween(current,next); next.visited=true; stack.push(next); } else stack.pop(); } }
     function getUnvisitedNeighbors(cell){ const n=[], {x,y}=cell; if(y>0&&!maze[y-1][x].visited)n.push(maze[y-1][x]); if(x<cols-1&&!maze[y][x+1].visited)n.push(maze[y][x+1]); if(y<rows-1&&!maze[y+1][x].visited)n.push(maze[y+1][x]); if(x>0&&!maze[y][x-1].visited)n.push(maze[y][x-1]); return n; }
@@ -4798,7 +4845,8 @@ openDeveloperCode = function(){ const pwd=prompt("Code développeur"); if(pwd!==
     function canvasCellFromPointer(event){ const rect=canvas.getBoundingClientRect(), scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height, x=Math.floor((event.clientX-rect.left)*scaleX/tileSize), y=Math.floor((event.clientY-rect.top)*scaleY/tileSize); if(x<0||x>=cols||y<0||y>=rows)return null; return{x,y}; }
     function moveTowardCell(target){ if(!target||gameOver)return; const dx=target.x-player.x, dy=target.y-player.y; if(dx===0&&dy===0)return; if(Math.abs(dx)>=Math.abs(dy))movePlayer(Math.sign(dx),0); else movePlayer(0,Math.sign(dy)); }
     function handleMouseMove(event){ moveTowardCell(canvasCellFromPointer(event)); }
-    canvas.style.cursor="crosshair"; canvas.addEventListener("mousemove",handleMouseMove); canvas.addEventListener("click",handleMouseMove); document.addEventListener("keydown",handleKeydown); restartButton.addEventListener("click",initMaze); currentMazeCleanup=()=>{ stopTimers(); canvas.removeEventListener("mousemove",handleMouseMove); canvas.removeEventListener("click",handleMouseMove); document.removeEventListener("keydown",handleKeydown); };
+    function handleTouchMove(event){ event.preventDefault(); const touch=event.touches?.[0]||event.changedTouches?.[0]; if(touch) moveTowardCell(canvasCellFromPointer(touch)); }
+    canvas.style.cursor="crosshair"; canvas.addEventListener("mousemove",handleMouseMove); canvas.addEventListener("click",handleMouseMove); canvas.addEventListener("touchstart",handleTouchMove,{passive:false}); canvas.addEventListener("touchmove",handleTouchMove,{passive:false}); document.addEventListener("keydown",handleKeydown); restartButton.addEventListener("click",initMaze); currentMazeCleanup=()=>{ stopTimers(); canvas.removeEventListener("mousemove",handleMouseMove); canvas.removeEventListener("click",handleMouseMove); canvas.removeEventListener("touchstart",handleTouchMove); canvas.removeEventListener("touchmove",handleTouchMove); document.removeEventListener("keydown",handleKeydown); };
     initMaze();
   };
 
@@ -5689,7 +5737,7 @@ modal.addEventListener("click",e=>{ if(e.target===modal) closeModal(); });
       buttons.sort((a,b)=>typeRank(a.textContent)-typeRank(b.textContent)||a.textContent.localeCompare(b.textContent)).forEach(btn=>bonusGroup.appendChild(btn));
     }
     const scoreSub=[...content.querySelectorAll('.stat-sub')].find(x=>x.textContent.includes('+1 niveau'));
-    if(scoreSub)scoreSub.textContent='+1 niveau tous les 200';
+    if(scoreSub)scoreSub.textContent='+1 niveau tous les 50';
   };
 
   const previousSetViewSkibidi=setView;
