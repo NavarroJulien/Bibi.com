@@ -2105,7 +2105,7 @@ const CARDS = [
   { id:96, name:"Galaxy Impact", points:9, image:"picap/gar.jpg", collections:[] },
   { id:97, name:"Zbouba", points:5, image:"picap/zbo.png", collections:[] },
   { id:98, name:"Congo Mali", points:5, image:"picap/cong.png", collections:[] },
-  { id:99, name:"Enzo Bautista", points:5, image:"picap/zoz2.png", collections:[] },
+  { id:99, name:"Enzo Bautista", points:5, image:"picap/zoz2.jpg", collections:[] },
   { id:100, name:"Kim Jung Un", points:5, image:"picap/kju.jpg", collections:[] },
   { id:101, name:"Botkz VS Pain d'épice", points:9, image:"picap/epi.jpg", collections:[] },
   { id:102, name:"Rayquaza", points:12, image:"picap/ray.jpg", collections:[] },
@@ -2228,8 +2228,8 @@ const COLLECTION_REWARD_CARDS = [
   { id:8006, name:"Julien X AD Laurent", points:92, image:"picap/ad.png", sourceCollection:"Julien", collectionReward:true, collections:["Récompenses collection"] },
   { id:8007, name:"Homelander", points:79, image:"picap/home.jpg", sourceCollection:"Super", collectionReward:true, collections:["Récompenses collection"] },
   { id:8008, name:"TooMuchLucile", points:88, image:"picap/2lll.jpeg", sourceCollection:"Aura", collectionReward:true, collections:["Récompenses collection"] },
-  { id:8013, name:"Eric Ciotti - UDR", points:85, image:"picap/udr.png", sourceCollection:"Deb", collectionReward:true, collections:["Récompenses collection"] },
-  { id:8013, name:"Tobi", points:87, image:"picap/tobi.png", sourceCollection:"Damian", collectionReward:true, collections:["Récompenses collection"] }
+  { id:8013, name:"Eric Ciotti - UDR", points:85, image:"picap/udr.", sourceCollection:"Deb", collectionReward:true, collections:["Récompenses collection"] },
+  { id:8013, name:"Tobi", points:87, image:"picap/tobi.jpg", sourceCollection:"Damian", collectionReward:true, collections:["Récompenses collection"] }
 ];
 
 const BOSSES = [
@@ -2242,7 +2242,7 @@ const BOSSES = [
 ];
 
 const EXTRA_BOSSES = [
-  { name:"Les pirates",        value:48,  image:"picap/trio2.png",       lat:37.459800, lng:-6.152344, glow:"#70ff9e", accent:"#ffd166" },
+  { name:"Les pirates",        value:48,  image:"picap/trio2.jpg",       lat:37.459800, lng:-6.152344, glow:"#70ff9e", accent:"#ffd166" },
   { name:"Maire de Fontenay",        value:62,  image:"picap/maire.jpg",       lat:66.583217, lng:22.995870, glow:"#70ff9e", accent:"#ffd166" },
   { name:"Kakashi",        value:78,  image:"picap/kakashi.png",       lat:19.808054, lng:-155.563008, glow:"#70ff9e", accent:"#ffd166" },
   { name:"Brainrot",   value:140,  image:"picap/br.jpg",         lat:7.994072, lng:100.367404, glow:"#ffd166", accent:"#54f4ff" },
@@ -2284,7 +2284,7 @@ const SPECIAL_BOSSES = [
   { name:"Ciao Kombucha", value:140, image:"picap/ciao.png", lat:52.736292, lng:14.122330, glow:"#00f0ff", accent:"#9b30ff", special:true, rewardName:"Ciao Kombucha" },
   { name:"Zunesha", value:210, image:"picap/zun.jpg", lat:48.792, lng:2.332, glow:"#f5c842", accent:"#ff4d6d", special:true, rewardName:"Zunesha" },
   { name:"Zoro One Piece", value:350, image:"picap/zoro.jpg", lat:37.788081, lng:13.484166, glow:"#ff3dcd", accent:"#00f0ff", special:true, rewardName:"Zoro" },
-  { name:"Naruto", value:410, image:"picap/naru.jpg", lat:48.852, lng:2.205, glow:"#9b30ff", accent:"#f5c842", special:true, rewardName:"Maghla" },
+  { name:"Naruto", value:410, image:"picap/naru.jpg", lat:48.852, lng:2.205, glow:"#9b30ff", accent:"#f5c842", special:true, rewardName:"Naruto" },
   { name:"Luffy Gear 5", value:530, image:"picap/luffy.png", lat:53.120405, lng:-99.323992, glow:"#ff2d5a", accent:"#ffe066", special:true, rewardName:"Luffy Gear 5" },
 ];
 
@@ -2352,7 +2352,7 @@ const SHOP_PACKS = [
   {
     id:"classic",
     name:"Pack classique",
-    cover:"picap/carpdp.jpeg",
+    cover:"picap/leo3.png",
     description:"Le pack normal : toutes les cartes du catalogue classique, comme avant.",
     getPool:()=>PACK_CATALOG
   },
@@ -4190,7 +4190,7 @@ installHsCards();
 
 const classicBossClosestTo250 = BASE_BOSSES.reduce((best,boss)=> Math.abs(Number(boss.value||0)-250) < Math.abs(Number(best.value||0)-250) ? boss : best, BASE_BOSSES[0]);
 const EXCLUSIVE_250_CARDS = [
-  { name:"Le compte en banque d'Axel", points:18 }, { name:"Le permis de la Deb", points:22 }, { name:"L'intelligence en restauration", points:26 }
+  { name:"Le compte en banque à zéro", points:18 }, { name:"Le permis repoussé", points:22 }, { name:"L'intelligence en restauration", points:26 }
 ].map((c,i)=>({ id:`ex250-${i}`, key:`ex250-${i}`, originalIndex:CATALOG.length+i, name:c.name, points:c.points, image:classicBossClosestTo250?.image || SKIBIDIFLUX_IMAGE, exclusive250:true, collections:[] }));
 EXCLUSIVE_250_CARDS.forEach(card=>{ if(!CATALOG.some(c=>c.key===card.key)) CATALOG.push(card); });
 if(!SHOP_PACKS.some(p=>p.id===BOSS_250_PACK_ID)){
@@ -4298,8 +4298,8 @@ openDeveloperCode = function(){ const pwd=prompt("Code développeur"); if(pwd!==
       SHOP_PACKS.push({ id, name, cover:cover||SKIBIDIFLUX_IMAGE, description:`Pack premium : même ouverture qu'un pack normal, mais aucune carte proposée sous ${minValue} de valeur.`, price, guaranteedMinValue:minValue, getPool:()=>PACK_CATALOG.filter(card=>cardPowerValue(card)>=minValue) });
     }
   }
-  registerGuaranteedPack('guaranteed-15','Pack only 15+',15,3,'picap/bamby2.png');
-  registerGuaranteedPack('guaranteed-30','Pack only 30+',30,10,'picap/cmspdp9.png');
+  registerGuaranteedPack('guaranteed-15','Pack only 15+',15,3,'picap/gmt.png');
+  registerGuaranteedPack('guaranteed-30','Pack only 30+',30,10,'picap/rmc.jpg');
 
   const oldConfigureShopPackPrices = configureShopPackPrices;
   configureShopPackPrices = function(){ oldConfigureShopPackPrices(); const p15=SHOP_PACKS.find(p=>p.id==='guaranteed-15'); if(p15) p15.price=3; const p30=SHOP_PACKS.find(p=>p.id==='guaranteed-30'); if(p30) p30.price=10; };
@@ -4359,7 +4359,7 @@ openDeveloperCode = function(){ const pwd=prompt("Code développeur"); if(pwd!==
   }
   function orderShopPacks(){
     purgeRemovedPacks();
-    registerGuaranteedPackPatch('guaranteed-50','Pack only 50+',50,25,'picap/martinapdpv2.png');
+    registerGuaranteedPackPatch('guaranteed-50','Pack only 50+',50,25,'picap/moi3.png');
     const bossIndex=SHOP_PACKS.findIndex(p=>p.id===BOSS_250_PACK_ID);
     if(bossIndex>=0){ const [bossPack]=SHOP_PACKS.splice(bossIndex,1); SHOP_PACKS.push(bossPack); }
   }
@@ -5723,7 +5723,7 @@ modal.addEventListener("click",e=>{ if(e.target===modal) closeModal(); });
       id:9100,
       name:'Les pirates Prime',
       points:91,
-      image:'picap/trio2.png',
+      image:'picap/trio2.jpg',
       sourceCollection:'Upgrade Pirates',
       collectionReward:true,
       collections:[COLLECTION_REWARD_GROUP_NAME]
