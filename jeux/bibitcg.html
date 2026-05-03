@@ -1837,6 +1837,305 @@
       .btn, .btn-sm { letter-spacing: .035em !important; }
     }
 
+
+
+    /* ─── PATCH FINAL IPHONE — navigation compacte + sections fluides ─── */
+    html {
+      width: 100%;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    img, canvas, video, iframe, .leaflet-container { max-width: 100%; }
+    .btn, button, [role="button"] { touch-action: manipulation; }
+    .nav-buttons .iphone-section-hidden { display: none !important; }
+    .nav-buttons .is-active-view {
+      outline: 1px solid rgba(245,200,66,.42);
+      box-shadow: 0 0 0 1px rgba(245,200,66,.16), 0 8px 24px rgba(0,0,0,.22) !important;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .tcg-card:hover,
+      .boss-mini-card:hover,
+      .stat-card:hover,
+      .fish-card:hover,
+      .combat-card-btn:hover:not(.dead):not(.healing),
+      .btn:hover:not(:disabled) {
+        transform: none !important;
+        filter: none !important;
+      }
+      .btn::after, .tcg-card::after { animation: none !important; }
+    }
+
+    @media (max-width: 600px) {
+      :root {
+        --card-w: min(42vw, 160px);
+        --card-h: calc(var(--card-w) * 1.4857);
+      }
+      .bg-grid, .bg-aurora { opacity: .32 !important; }
+      .app {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding:
+          max(10px, env(safe-area-inset-top))
+          max(8px, env(safe-area-inset-right))
+          calc(18px + env(safe-area-inset-bottom))
+          max(8px, env(safe-area-inset-left)) !important;
+      }
+      .site-header {
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+        padding: 4px 0 10px !important;
+      }
+      .site-header::after { left: 25% !important; width: 50% !important; }
+      .logo-eyebrow { font-size: .54rem !important; letter-spacing: .24em !important; }
+      .logo-title {
+        font-size: clamp(2rem, 13vw, 3.25rem) !important;
+        line-height: .9 !important;
+      }
+      .main-layout {
+        display: block !important;
+        width: 100% !important;
+      }
+      .panel {
+        width: 100% !important;
+        border-radius: 20px !important;
+        overflow: clip !important;
+      }
+      .arena {
+        min-height: 0 !important;
+        padding: 8px !important;
+      }
+      .battle-zone {
+        min-height: 0 !important;
+        border-radius: 18px !important;
+        overflow: visible !important;
+      }
+      .battle-content {
+        min-height: 0 !important;
+        padding: 10px !important;
+      }
+      .nav-bar {
+        position: sticky !important;
+        top: max(6px, env(safe-area-inset-top)) !important;
+        z-index: 30 !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        margin: 0 0 10px !important;
+        padding: 8px !important;
+        border-radius: 18px !important;
+        background: rgba(20,17,15,.88) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        box-shadow: 0 10px 28px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.08) !important;
+      }
+      .nav-info { min-width: 0 !important; text-align: center !important; }
+      .nav-view-title {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: .88rem !important;
+        line-height: 1.15 !important;
+      }
+      .nav-buttons {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        justify-content: stretch !important;
+        overflow: visible !important;
+      }
+      .nav-buttons .btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 44px !important;
+        padding: 8px 6px !important;
+        border-radius: 999px !important;
+        font-size: .62rem !important;
+        letter-spacing: .045em !important;
+        white-space: nowrap !important;
+      }
+      body:not(.section-nav-compact) .nav-buttons {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        max-height: 188px !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 2px !important;
+      }
+
+      .hero-section,
+      .mini-panel,
+      .maze-panel,
+      .boss-rush-panel,
+      .combat-panel,
+      .team-vs-side,
+      .course-card,
+      .home-action-group,
+      .collection-set-card,
+      .boss-mini-card,
+      .shop-pack-card,
+      .enemy-team-card {
+        border-radius: 18px !important;
+      }
+      .hero-section { padding: 16px 12px !important; }
+      .hero-title {
+        font-size: clamp(1.45rem, 10vw, 2.4rem) !important;
+        line-height: .94 !important;
+        overflow-wrap: anywhere !important;
+      }
+      .home-action-groups,
+      .mini-layout,
+      .turn-battle-layout,
+      .team-builder-layout,
+      .team-vs-layout,
+      .bar-scene,
+      .course-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .home-all-buttons,
+      .home-action-buttons,
+      .modal-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      .home-all-buttons .btn,
+      .home-action-buttons .btn,
+      .modal-actions .btn,
+      .btn-full {
+        width: 100% !important;
+        min-height: 44px !important;
+      }
+      .dash-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+      .cards-grid,
+      .team-stock-grid,
+      .combat-card-list,
+      .collection-sets-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+      .boss-list,
+      .shop-pack-grid,
+      .enemy-team-grid,
+      .unlock-grid,
+      .course-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .tcg-card,
+      .choice-card {
+        height: auto !important;
+        aspect-ratio: 175 / 260 !important;
+        min-height: 0 !important;
+      }
+      .team-stock-card,
+      .combat-card-btn { min-height: 166px !important; }
+      .choice-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .choice-row .vs-orb { justify-self: center !important; transform: scale(.82) !important; }
+      .battle-field { grid-template-columns: 1fr !important; gap: 10px !important; }
+      .battle-scene { padding: 12px !important; min-height: 0 !important; }
+      .boss-battle-card {
+        min-height: 300px !important;
+        height: min(62svh, 430px) !important;
+      }
+      .reward-bar,
+      .upgrade-hint-bar,
+      .maze-hud,
+      .team-summary-row,
+      .date-progress {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 7px !important;
+      }
+      .resource-row,
+      .team-summary-pill,
+      .top-resource-pill,
+      .reward-pill,
+      .maze-pill,
+      .progress-pill {
+        width: 100% !important;
+        min-width: 0 !important;
+        text-align: center !important;
+        justify-content: center !important;
+      }
+      .filters-row { grid-template-columns: 1fr !important; gap: 8px !important; }
+      input, select, textarea {
+        font-size: 16px !important;
+        min-height: 44px !important;
+      }
+      .trade-list, .combat-log {
+        max-height: min(52svh, 430px) !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .trade-row {
+        grid-template-columns: 46px 1fr !important;
+      }
+      .trade-row .btn {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+      }
+      #bossMap {
+        height: min(66svh, 560px) !important;
+        min-height: 330px !important;
+      }
+      .boss-popup { min-width: 0 !important; }
+      .leaflet-popup-content { width: min(78vw, 300px) !important; }
+      .bar-character { min-height: 300px !important; }
+      .date-answer-row { grid-template-columns: 1fr !important; }
+      .fishing-scene { min-height: 390px !important; }
+      #mazeGameCanvas {
+        width: 100% !important;
+        max-height: min(76vw, calc(var(--iphone-vh, 100svh) - 250px)) !important;
+        touch-action: none !important;
+      }
+      .modal {
+        align-items: end !important;
+        padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) !important;
+      }
+      .modal-inner {
+        max-height: calc(var(--iphone-vh, 100svh) - 22px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .toast-stack {
+        left: 8px !important;
+        right: 8px !important;
+        bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .nav-buttons .btn { font-size: .56rem !important; padding-inline: 4px !important; }
+      .cards-grid,
+      .team-stock-grid,
+      .combat-card-list,
+      .collection-sets-grid { gap: 7px !important; }
+      .card-name { font-size: .58rem !important; }
+      .card-power { font-size: .62rem !important; }
+      .stat-value { font-size: 1.32rem !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -6252,6 +6551,96 @@ setView("home");
   window.addEventListener('resize', setViewportHeight, { passive:true });
   if(window.visualViewport){ window.visualViewport.addEventListener('resize', setViewportHeight, { passive:true }); }
   document.addEventListener('touchstart', function(){}, { passive:true });
+})();
+</script>
+
+
+<script>
+/* Patch final iPhone : menu supérieur compact dans les sections */
+(function(){
+  var PRIMARY_VIEWS = ['home', 'team', 'shop'];
+  var LABELS = { home:'Accueil', team:'Team', shop:'Boutique' };
+  var navObserver = null;
+
+  function getCurrentViewSafe(){
+    try { if (typeof currentView !== 'undefined' && currentView) return currentView; } catch(e) {}
+    return document.body && document.body.dataset ? (document.body.dataset.currentView || 'home') : 'home';
+  }
+
+  function bindMissingViewClicks(nav){
+    nav.querySelectorAll('[data-view]').forEach(function(btn){
+      if(btn.dataset.iphoneBound === '1') return;
+      btn.dataset.iphoneBound = '1';
+      btn.addEventListener('click', function(){
+        if(typeof setView === 'function') setView(btn.dataset.view);
+      });
+    });
+  }
+
+  function syncIphoneTopNav(){
+    var nav = document.querySelector('.nav-buttons');
+    if(!nav) return;
+    var view = getCurrentViewSafe();
+    if(document.body){
+      document.body.dataset.currentView = view;
+      document.body.classList.toggle('section-nav-compact', view !== 'home');
+    }
+    bindMissingViewClicks(nav);
+
+    PRIMARY_VIEWS.forEach(function(v, index){
+      var btn = nav.querySelector('[data-view="' + v + '"]');
+      if(btn){
+        btn.textContent = LABELS[v];
+        btn.setAttribute('aria-label', LABELS[v]);
+        btn.style.order = view !== 'home' ? String(index + 1) : '';
+      }
+    });
+
+    nav.querySelectorAll('[data-view]').forEach(function(btn){
+      var isPrimary = PRIMARY_VIEWS.indexOf(btn.dataset.view) !== -1;
+      var hide = view !== 'home' && !isPrimary;
+      btn.classList.toggle('iphone-section-hidden', hide);
+      btn.classList.toggle('is-active-view', btn.dataset.view === view);
+      btn.style.order = view !== 'home' ? (isPrimary ? btn.style.order : '99') : '';
+      if(isPrimary) btn.classList.remove('locked-nav');
+    });
+  }
+
+  function installObserver(){
+    var nav = document.querySelector('.nav-buttons');
+    if(!nav || navObserver) return;
+    navObserver = new MutationObserver(function(){
+      window.requestAnimationFrame(syncIphoneTopNav);
+    });
+    navObserver.observe(nav, { childList:true, subtree:false, attributes:true, attributeFilter:['class','style'] });
+  }
+
+  if(typeof setView === 'function' && !setView.__iphoneCompactWrapped){
+    var previousSetView = setView;
+    setView = function(view){
+      var result = previousSetView.apply(this, arguments);
+      try { if(document.body) document.body.dataset.currentView = view; } catch(e) {}
+      window.requestAnimationFrame(syncIphoneTopNav);
+      return result;
+    };
+    setView.__iphoneCompactWrapped = true;
+  }
+
+  if(typeof updateNavLocks === 'function' && !updateNavLocks.__iphoneCompactWrapped){
+    var previousUpdateNavLocks = updateNavLocks;
+    updateNavLocks = function(){
+      var result = previousUpdateNavLocks.apply(this, arguments);
+      window.requestAnimationFrame(syncIphoneTopNav);
+      return result;
+    };
+    updateNavLocks.__iphoneCompactWrapped = true;
+  }
+
+  window.syncIphoneTopNav = syncIphoneTopNav;
+  installObserver();
+  syncIphoneTopNav();
+  window.addEventListener('resize', syncIphoneTopNav, { passive:true });
+  window.addEventListener('orientationchange', function(){ setTimeout(syncIphoneTopNav, 120); }, { passive:true });
 })();
 </script>
 
